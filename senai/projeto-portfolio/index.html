@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfólio UGC | Estética Fairycore & Morangos</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Config for Custom Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        moss: {
+                            900: '#1a271d', 
+                            800: '#233628', 
+                            700: '#2d4a36', 
+                            600: '#3c664b', 
+                        },
+                        fairy: {
+                            light: '#fbfbf2', 
+                            gold: '#d4af37',  
+                            glow: '#e6c25a',  
+                            berry: '#c84b31', /* Tom de vermelho morango fechado */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #1a271d;
+            color: #fbfbf2;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a271d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d4a36;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        /* Magical Glowing Image Border */
+        .magical-border {
+            position: relative;
+            border-radius: 2rem;
+            z-index: 10;
+        }
+        .magical-border::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 2.2rem;
+            background: linear-gradient(45deg, rgba(45,74,54,0), rgba(212,175,55,0.6), rgba(200,75,49,0.4));
+            z-index: -1;
+            filter: blur(8px);
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { opacity: 0.5; filter: blur(8px); }
+            100% { opacity: 1; filter: blur(12px); }
+        }
+
+        /* Float Animation */
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Floating Strawberries CSS */
+        .floating-strawberry {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.6;
+            z-index: 5;
+            user-select: none;
+            pointer-events: none;
+            animation: float-up 15s linear infinite;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(110vh) rotate(0deg) scale(0.8); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
+        }
+
+        /* Scroll Reveal Animation */
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal-element.reveal-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Fade-in for initial load */
+        .fade-in-load {
+            animation: fadeIn 2s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        .delay-400 { transition-delay: 400ms; }
+
+        /* Fireflies Canvas */
+        #fireflies-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glass-panel {
+            background: rgba(35, 54, 40, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased relative selection:bg-fairy-gold selection:text-moss-900">
+
+    <!-- Fireflies Background -->
+    <canvas id="fireflies-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel py-4 transition-all duration-300 transform -translate-y-full animate-[slideDown_0.8s_ease-out_forwards]">
+        <style>
+            @keyframes slideDown {
+                to { transform: translateY(0); }
+            }
+        </style>
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <a href="#capa" class="font-serif text-2xl font-bold text-fairy-light tracking-wider flex items-center gap-2">
+                UGC<span class="text-fairy-gold">.</span>Creator <span class="text-sm"></span>
+            </a>
+            
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-8 items-center text-sm font-medium tracking-wide">
+                <a href="#sobre" class="hover:text-fairy-gold transition-colors">Sobre Mim</a>
+                <a href="#portfolio" class="hover:text-fairy-gold transition-colors">Portfólio</a>
+                <a href="#servicos" class="hover:text-fairy-gold transition-colors">Serviços</a>
+                <a href="#contato" class="px-5 py-2 border border-fairy-gold text-fairy-gold rounded-full hover:bg-fairy-gold hover:text-moss-900 transition-all shadow-[0_0_10px_rgba(212,175,55,0.2)]">Contato</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-fairy-light text-2xl focus:outline-none" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-moss-900/95 backdrop-blur-md absolute w-full left-0 top-full flex flex-col items-center py-6 space-y-6 border-b border-moss-700">
+            <a href="#sobre" class="text-lg hover:text-fairy-gold transition-colors" onclick="toggleMobileMenu()">Sobre Mim</a>
+            <a href="#portfolio" class="text-lg hover:text-fairy-gold transition-colors" onclick="toggleMobileMenu()">Portfólio</a>
+            <a href="#servicos" class="text-lg hover:text-fairy-gold transition-colors" onclick="toggleMobileMenu()">Serviços</a>
+            <a href="#contato" class="text-lg text-fairy-gold transition-colors" onclick="toggleMobileMenu()">Contato</a>
+        </div>
+    </nav>
+
+    <!-- NEW HERO / CAPA SECTION -->
+    <section id="capa" class="relative z-10 h-screen flex flex-col items-center justify-center overflow-hidden">
+        <!-- Background Immersive Image -->
+        <div class="absolute inset-0 z-0 fade-in-load">
+            <img src="Design sem nome.png" alt="Capa UGC" class="w-full h-full object-cover object-center opacity-70">
+            <!-- Gradiente que escurece a parte de baixo para mesclar com o site, deixando o topo limpo -->
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-moss-900/60 to-moss-900"></div>
+        </div>
+
+        <!-- Floating Strawberries via HTML/CSS -->
+        <div class="floating-strawberry" style="left: 10%; animation-duration: 14s; animation-delay: 0s;">🍓</div>
+        <div class="floating-strawberry" style="left: 30%; animation-duration: 18s; animation-delay: 2s; font-size: 1rem;">🍓</div>
+        <div class="floating-strawberry" style="left: 50%; animation-duration: 16s; animation-delay: 5s;">🍓</div>
+        <div class="floating-strawberry" style="left: 70%; animation-duration: 19s; animation-delay: 1s; font-size: 1.2rem;">🍓</div>
+        <div class="floating-strawberry" style="left: 85%; animation-duration: 15s; animation-delay: 3s;">🍓</div>
+
+        <!-- Content Front -->
+        <div class="relative z-10 text-center flex flex-col items-center fade-in-load" style="animation-delay: 0.5s;">
+            <!-- Decor -->
+            <div class="text-fairy-gold text-2xl md:text-3xl mb-4 animate-pulse flex gap-3">
+                <i class="fas fa-sparkles"></i>
+                <span class="text-xl">🍓</span>
+                <i class="fas fa-sparkles"></i>
+            </div>
+            
+            <!-- Nome (Altere para o seu nome aqui!) -->
+            <h1 class="text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-fairy-light tracking-widest drop-shadow-2xl">
+                Maria Fernanda Mattoso
+            </h1>
+            
+            <p class="mt-4 text-xl md:text-2xl text-fairy-gold font-medium italic font-serif">
+                Aspirante a UGC Creator
+            </p>
+
+            <a href="#sobre" class="mt-16 text-fairy-light hover:text-fairy-gold hover:scale-110 transition-all duration-300 animate-bounce cursor-pointer flex flex-col items-center">
+                <span class="text-sm tracking-widest uppercase mb-2 opacity-70">Deslize a magia</span>
+                <i class="fas fa-chevron-down text-3xl"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Sobre Mim Section -->
+    <section id="sobre" class="relative z-10 min-h-screen flex items-center pt-24 pb-12 px-6 bg-moss-900">
+        <div class="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            
+            <!-- Text Content -->
+            <div class="order-2 md:order-1 text-center md:text-left space-y-6">
+                <p class="reveal-element text-fairy-gold font-semibold tracking-widest uppercase text-sm flex items-center justify-center md:justify-start gap-2">
+                    <i class="fas fa-leaf"></i> Apaixonada por estética
+                </p>
+                <h2 class="reveal-element delay-100 text-4xl md:text-5xl font-serif font-bold leading-tight">
+                    Iniciando minha <br>
+                    <span class="italic text-transparent bg-clip-text bg-gradient-to-r from-fairy-gold to-fairy-glow">jornada criativa</span> <span class="text-3xl">🍓</span>
+                </h2>
+                <p class="reveal-element delay-200 text-lg text-gray-300 max-w-lg mx-auto md:mx-0 leading-relaxed">
+                    Olá! Sou uma grande entusiasta do mundo UGC (User Generated Content). Estou construindo meu portfólio e explorando minha paixão por contar histórias visuais. Quero trazer a doçura e a estética mágica da natureza (com um leve toque de morango!) para criar reviews sinceros e conteúdos que encantem.
+                </p>
+                <div class="reveal-element delay-300 flex flex-col sm:flex-row items-center gap-4 pt-4 justify-center md:justify-start">
+                    <a href="#portfolio" class="w-full sm:w-auto px-8 py-3 bg-fairy-gold text-moss-900 font-semibold rounded-full hover:bg-fairy-glow transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] text-center">
+                        Ver meu trabalho
+                    </a>
+                </div>
+            </div>
+
+            <!-- Second Image / Details -->
+            <div class="order-1 md:order-2 flex justify-center md:justify-end reveal-element delay-200">
+                <!-- Ajustamos a largura no container para a borda mágica acompanhar a foto -->
+                <div class="magical-border floating w-full max-w-[18rem] md:max-w-[22rem]">
+                    <!-- Aqui você pode colocar uma SEGUNDA foto sua futuramente. Por enquanto, mantive a mesma. -->
+                    <img 
+                        src="1000284716.jpg" 
+                        alt="Foto Sobre Mim" 
+                        class="w-full aspect-[4/5] object-cover rounded-[2rem] border border-moss-600 relative z-10 shadow-[0_0_40px_rgba(212,175,55,0.15)]"
+                    >
+                    <div class="absolute -top-4 -right-4 text-2xl z-20 animate-bounce" style="animation-duration: 3s;">🍓</div>
+                    <div class="absolute -bottom-4 -left-4 text-fairy-gold opacity-60 animate-pulse text-xl z-20" style="animation-delay: 1s;"><i class="fas fa-sparkles"></i></div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- NOVA SEÇÃO: Hobbies e Formação (Novo Frame com mais respiro) -->
+    <section id="interesses" class="relative z-10 py-24 px-6 bg-moss-900/60 border-t border-moss-800">
+        <div class="max-w-7xl mx-auto w-full">
+            <div class="text-center mb-16 reveal-element">
+                <h3 class="text-3xl md:text-4xl font-serif font-bold text-fairy-light">Além das câmeras <span class="text-fairy-gold text-xl">✨</span></h3>
+                <p class="text-gray-400 mt-4 max-w-2xl mx-auto text-lg">Meus interesses e estudos que ajudam a moldar o meu olhar criativo para o universo das marcas.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 reveal-element delay-200">
+                <!-- Card Formação -->
+                <div class="glass-panel p-8 md:p-10 rounded-3xl border border-moss-700 hover:border-fairy-gold transition-colors duration-300 relative overflow-hidden group shadow-lg">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 text-8xl text-fairy-gold group-hover:opacity-10 transition-opacity">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-moss-800 flex items-center justify-center text-fairy-gold text-2xl border border-moss-600">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h4 class="text-2xl font-serif font-bold text-fairy-light">Minha Formação</h4>
+                    </div>
+                    <p class="text-gray-300 leading-relaxed text-lg relative z-10">
+                        Atualmente estudo <strong class="text-fairy-gold">[Seu Curso / Ensino Médio / Faculdade]</strong>. Essa base me ajuda a ter uma visão muito mais estratégica sobre <strong class="text-fairy-gold">[Ex: comportamento, estética, tendências]</strong> na hora de pensar nos roteiros para as marcas.
+                    </p>
+                </div>
+
+                <!-- Card Hobbies/Nichos -->
+                <div class="glass-panel p-8 md:p-10 rounded-3xl border border-moss-700 hover:border-fairy-gold transition-colors duration-300 relative overflow-hidden group shadow-lg">
+                    <div class="absolute -right-4 -bottom-4 opacity-5 text-8xl text-fairy-gold group-hover:opacity-10 transition-opacity">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-moss-800 flex items-center justify-center text-fairy-gold text-2xl border border-moss-600">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h4 class="text-2xl font-serif font-bold text-fairy-light">O que eu amo <span class="text-sm">🍓</span></h4>
+                    </div>
+                    <p class="text-gray-300 leading-relaxed mb-6 text-lg relative z-10">
+                        Sou consumidora assídua e apaixonada por esses nichos, o que faz com que eu consiga gravar vídeos muito mais sinceros e conectados com o público:
+                    </p>
+                    <div class="flex flex-wrap gap-3 relative z-10">
+                        <!-- Altere os ícones e textos abaixo para as suas paixões! -->
+                        <span class="px-4 py-2 bg-moss-800 border border-moss-600 rounded-full text-sm text-fairy-light flex items-center gap-2 hover:border-fairy-gold transition-colors cursor-default shadow-sm"><i class="fas fa-spa text-fairy-gold"></i> Skincare & Beleza</span>
+                        <span class="px-4 py-2 bg-moss-800 border border-moss-600 rounded-full text-sm text-fairy-light flex items-center gap-2 hover:border-fairy-gold transition-colors cursor-default shadow-sm"><i class="fas fa-pen-nib text-fairy-gold"></i> Papelaria & Livros</span>
+                        <span class="px-4 py-2 bg-moss-800 border border-moss-600 rounded-full text-sm text-fairy-light flex items-center gap-2 hover:border-fairy-gold transition-colors cursor-default shadow-sm"><i class="fas fa-mug-hot text-fairy-gold"></i> Lifestyle & Café</span>
+                        <span class="px-4 py-2 bg-moss-800 border border-moss-600 rounded-full text-sm text-fairy-light flex items-center gap-2 hover:border-fairy-gold transition-colors cursor-default shadow-sm"><i class="fas fa-paw text-fairy-gold"></i> Pets</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="relative z-10 py-24 bg-moss-900/50 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal-element">
+                <div class="flex justify-center mb-2"><i class="fas fa-camera text-fairy-gold/50 text-2xl"></i></div>
+                <h2 class="text-4xl md:text-5xl font-serif font-bold mb-4">Meu <span class="italic text-fairy-gold">Portfólio</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Um espaço em construção onde em breve compartilharei meus reviews, unboxings e testes de produtos com muito carinho e criatividade.</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex justify-center gap-4 mb-12 reveal-element delay-100">
+                <button id="btn-videos" onclick="switchTab('videos')" class="px-6 py-2 rounded-full bg-fairy-gold text-moss-900 font-semibold transition-all shadow-[0_0_10px_rgba(212,175,55,0.3)]">
+                    <i class="fas fa-video mr-2"></i> Vídeos
+                </button>
+                <button id="btn-fotos" onclick="switchTab('fotos')" class="px-6 py-2 rounded-full border border-moss-600 text-fairy-light hover:bg-moss-800 transition-all">
+                    <i class="fas fa-image mr-2"></i> Fotos
+                </button>
+            </div>
+
+            <!-- Videos Grid (Placeholder) 9:16 -->
+            <div id="grid-videos" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                <div class="reveal-element delay-100 aspect-[9/16] glass-panel rounded-2xl overflow-hidden relative group cursor-pointer border border-moss-700 flex items-center justify-center">
+                    <div class="text-center text-moss-600 group-hover:text-fairy-gold transition-colors duration-300 z-10 relative">
+                        <i class="fas fa-play-circle text-5xl mb-3 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"></i>
+                        <p class="text-sm font-medium tracking-wider uppercase opacity-70">Adicionar Vídeo</p>
+                    </div>
+                    <div class="absolute inset-0 bg-moss-800/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                </div>
+                <div class="reveal-element delay-200 aspect-[9/16] glass-panel rounded-2xl overflow-hidden relative group cursor-pointer border border-moss-700 flex items-center justify-center">
+                    <div class="text-center text-moss-600 group-hover:text-fairy-gold transition-colors duration-300 z-10 relative">
+                        <i class="fas fa-play-circle text-5xl mb-3 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"></i>
+                        <p class="text-sm font-medium tracking-wider uppercase opacity-70">Adicionar Vídeo</p>
+                    </div>
+                    <div class="absolute inset-0 bg-moss-800/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                </div>
+                <div class="reveal-element delay-300 aspect-[9/16] glass-panel rounded-2xl overflow-hidden relative group cursor-pointer border border-moss-700 flex items-center justify-center">
+                    <div class="text-center text-moss-600 group-hover:text-fairy-gold transition-colors duration-300 z-10 relative">
+                        <i class="fas fa-play-circle text-5xl mb-3 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"></i>
+                        <p class="text-sm font-medium tracking-wider uppercase opacity-70">Adicionar Vídeo</p>
+                    </div>
+                    <div class="absolute inset-0 bg-moss-800/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                </div>
+                <div class="reveal-element delay-400 aspect-[9/16] glass-panel rounded-2xl overflow-hidden relative group cursor-pointer border border-moss-700 flex items-center justify-center hidden md:flex">
+                    <div class="text-center text-moss-600 group-hover:text-fairy-gold transition-colors duration-300 z-10 relative">
+                        <i class="fas fa-play-circle text-5xl mb-3 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"></i>
+                        <p class="text-sm font-medium tracking-wider uppercase opacity-70">Adicionar Vídeo</p>
+                    </div>
+                    <div class="absolute inset-0 bg-moss-800/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                </div>
+            </div>
+
+            <!-- Fotos Grid (Placeholder) 4:5 -->
+            <div id="grid-fotos" class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 hidden">
+                <div class="aspect-[4/5] glass-panel rounded-2xl overflow-hidden relative group cursor-pointer border border-moss-700 flex items-center justify-center">
+                    <div class="text-center text-moss-600 group-hover:text-fairy-gold transition-colors duration-300 z-10 relative">
+                        <i class="fas fa-image text-5xl mb-3 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"></i>
+                        <p class="text-sm font-medium tracking-wider uppercase opacity-70">Adicionar Foto</p>
+                    </div>
+                    <div class="absolute inset-0 bg-moss-800/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                </div>
+                <div class="aspect-[4/5] glass-panel rounded-2xl overflow-hidden relative group cursor-pointer border border-moss-700 flex items-center justify-center">
+                    <div class="text-center text-moss-600 group-hover:text-fairy-gold transition-colors duration-300 z-10 relative">
+                        <i class="fas fa-image text-5xl mb-3 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"></i>
+                        <p class="text-sm font-medium tracking-wider uppercase opacity-70">Adicionar Foto</p>
+                    </div>
+                    <div class="absolute inset-0 bg-moss-800/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                </div>
+                <div class="aspect-[4/5] glass-panel rounded-2xl overflow-hidden relative group cursor-pointer border border-moss-700 flex items-center justify-center">
+                    <div class="text-center text-moss-600 group-hover:text-fairy-gold transition-colors duration-300 z-10 relative">
+                        <i class="fas fa-image text-5xl mb-3 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"></i>
+                        <p class="text-sm font-medium tracking-wider uppercase opacity-70">Adicionar Foto</p>
+                    </div>
+                    <div class="absolute inset-0 bg-moss-800/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12 reveal-element delay-200">
+                <p class="text-sm text-moss-600 italic">* Instrução: Substitua as áreas acima usando as tags &lt;video&gt; ou &lt;img&gt; no código HTML.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services / Packages Section -->
+    <section id="servicos" class="relative z-10 py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal-element">
+                <h2 class="text-4xl md:text-5xl font-serif font-bold mb-4">Meus <span class="italic text-fairy-gold">Serviços</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Formatos e ideias de pacotes que estou animada para oferecer em breve para marcas interessadas em crescer de forma autêntica.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Package 1 -->
+                <div class="reveal-element delay-100 glass-panel p-8 rounded-3xl border border-moss-700 hover:border-fairy-gold transition-colors duration-300 flex flex-col h-full relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                        <i class="fas fa-leaf text-6xl text-fairy-gold"></i>
+                    </div>
+                    <h3 class="text-2xl font-serif font-bold mb-2">Seed</h3>
+                    <p class="text-fairy-gold font-medium mb-6">Ideal para testar formatos</p>
+                    <ul class="space-y-4 mb-8 flex-grow text-gray-300">
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> 1 Vídeo Curto (15-30s)</li>
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> 3 Fotos de Produto</li>
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> Direção de Arte Básica</li>
+                    </ul>
+                    <a href="#contato" class="block w-full py-3 text-center border border-moss-600 rounded-full hover:bg-moss-800 transition-all font-semibold">Solicitar Orçamento</a>
+                </div>
+
+                <!-- Package 2 (Highlight) -->
+                <div class="reveal-element delay-200 glass-panel p-8 rounded-3xl border border-fairy-gold relative transform md:-translate-y-4 shadow-[0_10px_30px_rgba(212,175,55,0.15)] flex flex-col h-full overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-fairy-gold to-transparent"></div>
+                    <div class="absolute top-4 right-4 bg-fairy-gold text-moss-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Mais Popular</div>
+                    
+                    <h3 class="text-2xl font-serif font-bold mb-2">Blossom</h3>
+                    <p class="text-fairy-gold font-medium mb-6 flex gap-2 items-center">Campanhas completas <span class="text-sm">🍓</span></p>
+                    <ul class="space-y-4 mb-8 flex-grow text-gray-300">
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> 3 Vídeos Curtos (15-60s)</li>
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> 10 Fotos de Produto (High-end)</li>
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> Roteiro e Storytelling</li>
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> Hook Testing (2 variações)</li>
+                    </ul>
+                    <a href="#contato" class="block w-full py-3 text-center bg-fairy-gold text-moss-900 rounded-full hover:bg-fairy-glow transition-all font-semibold shadow-lg">Solicitar Orçamento</a>
+                </div>
+
+                <!-- Package 3 -->
+                <div class="reveal-element delay-300 glass-panel p-8 rounded-3xl border border-moss-700 hover:border-fairy-gold transition-colors duration-300 flex flex-col h-full relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                        <i class="fas fa-crown text-6xl text-fairy-gold"></i>
+                    </div>
+                    <h3 class="text-2xl font-serif font-bold mb-2">Forest</h3>
+                    <p class="text-fairy-gold font-medium mb-6">Retainer Mensal</p>
+                    <ul class="space-y-4 mb-8 flex-grow text-gray-300">
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> +8 Vídeos p/ mês</li>
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> Banco de Imagens Exclusivo</li>
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> Análise de Tendências</li>
+                        <li class="flex items-start"><i class="fas fa-check text-fairy-gold mt-1 mr-3 text-sm"></i> Entrega semanal</li>
+                    </ul>
+                    <a href="#contato" class="block w-full py-3 text-center border border-moss-600 rounded-full hover:bg-moss-800 transition-all font-semibold">Solicitar Orçamento</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contato" class="relative z-10 py-24 bg-moss-900/80 px-6 border-t border-moss-800">
+        <div class="max-w-3xl mx-auto text-center reveal-element">
+            <h2 class="text-4xl md:text-5xl font-serif font-bold mb-6">Vamos criar <span class="italic text-fairy-gold">magia</span> juntas? ✨</h2>
+            <p class="text-gray-300 mb-10 text-lg">Estou em busca das minhas primeiras oportunidades para mostrar o meu potencial! Seja para um envio de PR (recebidos) ou uma primeira parceria, vou adorar agregar valor à sua marca.</p>
+            
+            <div class="flex flex-col md:flex-row justify-center items-center gap-6 reveal-element delay-200">
+                <a href="mailto:seuemail@exemplo.com" class="flex items-center gap-3 px-8 py-4 bg-fairy-gold text-moss-900 rounded-full font-bold hover:bg-fairy-glow transition-all shadow-lg w-full md:w-auto justify-center">
+                    <i class="fas fa-envelope text-xl"></i> Enviar Email
+                </a>
+                <div class="flex gap-4">
+                    <a href="#" class="w-14 h-14 rounded-full border border-moss-600 flex items-center justify-center text-xl text-fairy-light hover:text-fairy-gold hover:border-fairy-gold transition-colors">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="w-14 h-14 rounded-full border border-moss-600 flex items-center justify-center text-xl text-fairy-light hover:text-fairy-gold hover:border-fairy-gold transition-colors">
+                        <i class="fab fa-tiktok"></i>
+                    </a>
+                    <a href="#" class="w-14 h-14 rounded-full border border-moss-600 flex items-center justify-center text-xl text-fairy-light hover:text-fairy-gold hover:border-fairy-gold transition-colors">
+                        <i class="fab fa-pinterest"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="relative z-10 py-6 border-t border-moss-800 text-center text-moss-600 text-sm">
+        <p>© 2026 UGC Creator. Todos os direitos reservados. Feito com <i class="fas fa-heart text-fairy-gold text-xs mx-1"></i>, magia e morangos 🍓.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- 1. Mobile Menu Toggle ---
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- 2. Tabs Logic for Portfolio ---
+        function switchTab(tabName) {
+            const btnVideos = document.getElementById('btn-videos');
+            const btnFotos = document.getElementById('btn-fotos');
+            const gridVideos = document.getElementById('grid-videos');
+            const gridFotos = document.getElementById('grid-fotos');
+
+            // Reset Styles
+            btnVideos.className = "px-6 py-2 rounded-full border border-moss-600 text-fairy-light hover:bg-moss-800 transition-all";
+            btnFotos.className = "px-6 py-2 rounded-full border border-moss-600 text-fairy-light hover:bg-moss-800 transition-all";
+            
+            gridVideos.classList.add('hidden');
+            gridFotos.classList.add('hidden');
+
+            // Apply Active Styles
+            if(tabName === 'videos') {
+                btnVideos.className = "px-6 py-2 rounded-full bg-fairy-gold text-moss-900 font-semibold transition-all shadow-[0_0_10px_rgba(212,175,55,0.3)]";
+                gridVideos.classList.remove('hidden');
+            } else {
+                btnFotos.className = "px-6 py-2 rounded-full bg-fairy-gold text-moss-900 font-semibold transition-all shadow-[0_0_10px_rgba(212,175,55,0.3)]";
+                gridFotos.classList.remove('hidden');
+            }
+            
+            // Re-trigger animations
+            setTimeout(() => {
+                const elements = document.querySelectorAll('.reveal-element');
+                elements.forEach(el => observer.observe(el));
+            }, 100);
+        }
+
+        // --- 3. Scroll Reveal Animation (Lisinho) ---
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15 
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-active');
+                } else {
+                    entry.target.classList.remove('reveal-active');
+                }
+            });
+        }, observerOptions);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const revealElements = document.querySelectorAll('.reveal-element');
+            revealElements.forEach(el => observer.observe(el));
+        });
+
+        // --- 4. Magic Fireflies Animation ---
+        const canvas = document.getElementById('fireflies-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let fireflies = [];
+        const numFireflies = 70;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Firefly {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = (Math.random() - 0.5) * 0.4;
+                this.color = Math.random() > 0.5 ? 'rgba(212, 175, 55, ' : 'rgba(230, 194, 90, '; 
+                this.alpha = Math.random();
+                this.alphaChange = (Math.random() * 0.015) + 0.005;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                this.alpha += this.alphaChange;
+                if(this.alpha <= 0.1 || this.alpha >= 0.8) {
+                    this.alphaChange = -this.alphaChange;
+                }
+
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + this.alpha + ')';
+                
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#d4af37';
+                
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function initFireflies() {
+            fireflies = [];
+            for (let i = 0; i < numFireflies; i++) {
+                fireflies.push(new Firefly());
+            }
+        }
+
+        function animateFireflies() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < fireflies.length; i++) {
+                fireflies[i].update();
+                fireflies[i].draw();
+            }
+            requestAnimationFrame(animateFireflies);
+        }
+
+        initFireflies();
+        animateFireflies();
+    </script>
+</body>
+</html>
