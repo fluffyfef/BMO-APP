@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Switch, ScrollView, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, Switch, ScrollView, SafeAreaView, Platform, StatusBar, Alert, TouchableOpacity } from 'react-native';
 
 export default function App() {
-  // Estados dos sensores
+  // Estados dos sensores existentes
   const [temp, setTemp] = useState('24.5');
   const [hum, setHum] = useState(85);
   const [co2, setCo2] = useState(750);
+
+  // NOVO: Estados do Reservatório de Água
+  const [nivelAgua, setNivelAgua] = useState(100); // Começa em 100%
+  const [alertaEnviado, setAlertaEnviado] = useState(false);
 
   // Estados dos atuadores
   const [nevoa, setNevoa] = useState(true);
@@ -15,258 +19,221 @@ export default function App() {
   // Simulação dos dados IoT
   useEffect(() => {
     const interval = setInterval(() => {
+      // Atualiza os sensores antigos
       const tempAtual = (24.0 + (Math.random() * 1.5 - 0.5)).toFixed(1);
-      const humAtual = Math.floor(85 + (Math.random() * 5 - 2));
-      const co2Atual = Math.floor(750 + (Math.random() * 50 - 25));
-
       setTemp(tempAtual);
-      setHum(humAtual);
-      setCo2(co2Atual);
+      setHum(Math.floor(85 + (Math.random() * 5 - 2)));
+      setCo2(Math.floor(750 + (Math.random() * 50 - 25)));
 
-      // Lógica de alerta
-      if (co2Atual > 780) {
-        setExaustor(true);
-      }
-    }, 3000);
+      // NOVO: Simula o aspersor consumindo água (cai 10% a cada ciclo para facilitar o teste)
+      setNivelAgua((nivelAnterior) => {
+        const novoNivel = nivelAnterior > 0 ? nivelAnterior - 10 : 0;
+
+        // Dispara a notificação se chegar a 20% ou menos e o alerta ainda não tiver sido mostrado
+        if (novoNivel <= 20 && !alertaEnviado) {
+          Alert.alert(
+            "⚠️ ALERTA DO B.M.O.",
+            "O nível de água está muito baixo! Reabasteça o reservatório para manter os cogumelos felizes e úmidos.",
+            [{ text: "Entendido!" }]
+          );
+          setAlertaEnviado(true); // Evita que a notificação fique "spammando" a cada segundo
+        }
+        return novoNivel;
+      });
+
+    }, 3000); // O ciclo roda a cada 3 segundos
 
     return () => clearInterval(interval);
-  }, []);
+  }, [alertaEnviado]);
 
-  const emAlerta = co2 > 780;
+  // Função para simular o reabastecimento físico do tanque
+  const reabastecerAgua = () => {
+    setNivelAgua(100);
+    setAlertaEnviado(false);
+    Alert.alert("💧 Glup, glup!", "Reservatório cheio! B.M.O. está pronto para continuar umidificando.");
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.bmoCorpo}>
+      <StatusBar barStyle="dark-content" />
+      
       <ScrollView contentContainerStyle={styles.container}>
-        
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.headerTitle}>B.M.O.</Text>
-            <Text style={styles.headerSubtitle}>Bio-Monitoramento Operacional</Text>
-          </View>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarIcon}>🎮</Text>
-          </View>
-        </View>
-
-        {/* Banner de Status */}
-        <View style={[styles.statusBanner, emAlerta && styles.statusBannerAlert]}>
-          <Text style={[styles.statusText, emAlerta && styles.statusTextAlert]}>
-            {emAlerta ? '🚨 Alerta de CO2!' : '✨ Clima Perfeito!'}
-          </Text>
-        </View>
-
-        {/* Grid de Sensores */}
-        <View style={styles.grid}>
-          <View style={styles.card}>
-            <Text style={styles.cardIcon}>🌡️</Text>
-            <Text style={styles.cardTitle}>TEMP</Text>
-            <Text style={styles.cardValue}>{temp} <Text style={styles.cardUnit}>°C</Text></Text>
-          </View>
+        {/* TELA DO B.M.O. */}
+        <View style={styles.bmoTela}>
+          <Text style={styles.tituloTela}>Monitoramento Fúngico</Text>
           
-          <View style={styles.card}>
-            <Text style={styles.cardIcon}>💧</Text>
-            <Text style={styles.cardTitle}>UMIDADE</Text>
-            <Text style={styles.cardValue}>{hum} <Text style={styles.cardUnit}>%</Text></Text>
-          </View>
-
-          <View style={[styles.card, styles.cardFull]}>
-            <Text style={styles.cardIcon}>🍄</Text>
-            <View style={styles.cardFullText}>
-              <Text style={styles.cardTitle}>CRESCIMENTO / CO2</Text>
-              <Text style={styles.cardValue}>{co2} <Text style={styles.cardUnit}>ppm</Text></Text>
+          <View style={styles.sensorGrid}>
+            <View style={styles.sensorCard}>
+              <Text style={styles.sensorLabel}>Temperatura</Text>
+              <Text style={styles.sensorValor}>{temp}°C</Text>
+            </View>
+            <View style={styles.sensorCard}>
+              <Text style={styles.sensorLabel}>Umidade</Text>
+              <Text style={styles.sensorValor}>{hum}%</Text>
+            </View>
+            <View style={styles.sensorCard}>
+              <Text style={styles.sensorLabel}>CO2</Text>
+              <Text style={styles.sensorValor}>{co2} ppm</Text>
+            </View>
+            
+            {/* NOVO: CARD DO NÍVEL DE ÁGUA */}
+            <View style={[styles.sensorCard, nivelAgua <= 20 && styles.sensorAlerta]}>
+              <Text style={[styles.sensorLabel, nivelAgua <= 20 && styles.textoAlerta]}>Nível de Água</Text>
+              <Text style={[styles.sensorValor, nivelAgua <= 20 && styles.textoAlerta]}>{nivelAgua}%</Text>
             </View>
           </View>
         </View>
 
-        {/* Controles Manuais */}
-        <View style={styles.controlsSection}>
-          <Text style={styles.sectionTitle}>CONTROLE MANUAL</Text>
+        {/* PAINEL DE BOTÕES DO B.M.O. */}
+        <View style={styles.painelBotoes}>
+          
+          {/* Botão de Reabastecimento (Triângulo amarelo do BMO) */}
+          <TouchableOpacity style={styles.botaoReabastecer} onPress={reabastecerAgua}>
+            <Text style={styles.textoBotao}>REABASTECER ÁGUA</Text>
+          </TouchableOpacity>
 
-          <View style={styles.controlItem}>
-            <View style={styles.controlInfo}>
-              <Text style={styles.controlIcon}>💦</Text>
-              <Text style={styles.controlLabel}>Névoa</Text>
-            </View>
+          <Text style={styles.tituloControles}>Atuadores Manuais</Text>
+          
+          <View style={styles.controleLinha}>
+            <Text style={styles.controleLabel}>Aspersor / Névoa</Text>
             <Switch
-              trackColor={{ false: '#45A395', true: '#3EBCF0' }}
-              thumbColor={nevoa ? '#ffffff' : '#FF4A5A'}
-              onValueChange={() => setNevoa(!nevoa)}
+              trackColor={{ false: "#767577", true: "#E73A4F" }}
+              thumbColor={nevoa ? "#F8DE59" : "#f4f3f4"}
+              onValueChange={setNevoa}
               value={nevoa}
             />
           </View>
 
-          <View style={styles.controlItem}>
-            <View style={styles.controlInfo}>
-              <Text style={styles.controlIcon}>💨</Text>
-              <Text style={styles.controlLabel}>Exaustor</Text>
-            </View>
+          <View style={styles.controleLinha}>
+            <Text style={styles.controleLabel}>Exaustor de CO2</Text>
             <Switch
-              trackColor={{ false: '#45A395', true: '#3EBCF0' }}
-              thumbColor={exaustor ? '#ffffff' : '#FF4A5A'}
-              onValueChange={() => setExaustor(!exaustor)}
+              trackColor={{ false: "#767577", true: "#E73A4F" }}
+              thumbColor={exaustor ? "#F8DE59" : "#f4f3f4"}
+              onValueChange={setExaustor}
               value={exaustor}
             />
           </View>
 
-          <View style={styles.controlItem}>
-            <View style={styles.controlInfo}>
-              <Text style={styles.controlIcon}>💡</Text>
-              <Text style={styles.controlLabel}>Luz Fria</Text>
-            </View>
+          <View style={styles.controleLinha}>
+            <Text style={styles.controleLabel}>Iluminação</Text>
             <Switch
-              trackColor={{ false: '#45A395', true: '#3EBCF0' }}
-              thumbColor={luz ? '#ffffff' : '#FF4A5A'}
-              onValueChange={() => setLuz(!luz)}
+              trackColor={{ false: "#767577", true: "#E73A4F" }}
+              thumbColor={luz ? "#F8DE59" : "#f4f3f4"}
+              onValueChange={setLuz}
               value={luz}
             />
           </View>
-
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// Estilização (Simulando o CSS com a paleta do BMO)
+// Estilização (Estética B.M.O.)
 const styles = StyleSheet.create({
-  safeArea: {
+  bmoCorpo: {
     flex: 1,
-    backgroundColor: '#5DC8B8', // Corpo do BMO
+    backgroundColor: '#5DC8B8', // Verde-água clássico do corpo do BMO
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
     padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
   },
-  headerTitle: {
-    fontSize: 28,
+  bmoTela: {
+    backgroundColor: '#E4ECAE', // Verde clarinho da tela do BMO
+    width: '100%',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 8,
+    borderColor: '#1D2323',
+    marginBottom: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  tituloTela: {
+    fontSize: 22,
     fontWeight: '900',
-    color: '#153E45',
+    color: '#1D2323',
+    textAlign: 'center',
+    marginBottom: 15,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#153E45',
-    opacity: 0.8,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#FFD23F',
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#153E45',
-    borderBottomWidth: 5,
-  },
-  avatarIcon: {
-    fontSize: 24,
-  },
-  statusBanner: {
-    backgroundColor: '#FFD23F',
-    padding: 15,
-    borderRadius: 16,
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#153E45',
-    borderBottomWidth: 6,
-    marginBottom: 25,
-  },
-  statusBannerAlert: {
-    backgroundColor: '#FF4A5A',
-    borderColor: '#D43140',
-  },
-  statusText: {
-    fontWeight: '900',
-    fontSize: 18,
-    color: '#153E45',
-  },
-  statusTextAlert: {
-    color: '#ffffff',
-  },
-  grid: {
+  sensorGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 30,
   },
-  card: {
-    backgroundColor: '#E0F2D8', // Telinha do BMO
-    width: '48%',
+  sensorCard: {
+    width: '45%',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
     padding: 15,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: '#153E45',
-    borderBottomWidth: 6,
-    alignItems: 'center',
+    borderRadius: 10,
     marginBottom: 15,
-  },
-  cardFull: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
-  cardFullText: {
-    marginLeft: 15,
+  sensorAlerta: {
+    backgroundColor: '#FFD1D1',
+    borderColor: '#E73A4F',
   },
-  cardIcon: {
-    fontSize: 32,
-    marginBottom: 5,
-  },
-  cardTitle: {
+  sensorLabel: {
     fontSize: 12,
-    fontWeight: '900',
-    color: '#3A737A',
-    marginBottom: 5,
+    color: '#1D2323',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
-  cardValue: {
-    fontSize: 32,
+  sensorValor: {
+    fontSize: 24,
+    color: '#1D2323',
     fontWeight: '900',
-    color: '#153E45',
+    marginTop: 5,
   },
-  cardUnit: {
+  textoAlerta: {
+    color: '#E73A4F',
+  },
+  painelBotoes: {
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  botaoReabastecer: {
+    backgroundColor: '#F8DE59', // Amarelo direcional do BMO
+    padding: 15,
+    borderRadius: 30,
+    alignItems: 'center',
+    marginBottom: 30,
+    borderWidth: 3,
+    borderColor: '#1D2323',
+  },
+  textoBotao: {
+    color: '#1D2323',
+    fontWeight: '900',
     fontSize: 16,
   },
-  controlsSection: {
-    marginTop: 10,
-  },
-  sectionTitle: {
+  tituloControles: {
     fontSize: 18,
-    fontWeight: '900',
-    color: '#153E45',
+    fontWeight: 'bold',
+    color: '#1D2323',
     marginBottom: 15,
   },
-  controlItem: {
+  controleLinha: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#E0F2D8',
-    padding: 18,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: '#153E45',
-    borderBottomWidth: 5,
-    marginBottom: 15,
+    backgroundColor: 'rgba(29, 35, 35, 0.1)',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
   },
-  controlInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  controlIcon: {
-    fontSize: 24,
-    marginRight: 10,
-  },
-  controlLabel: {
+  controleLabel: {
     fontSize: 16,
-    fontWeight: '900',
-    color: '#153E45',
-  }
+    color: '#1D2323',
+    fontWeight: 'bold',
+  },
 });
