@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador B.M.O. - TCC Estufa de Cogumelos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bmoTeal: '#5DC8B8',
+                        bmoGreen: '#E4ECAE',
+                        bmoDark: '#1D2323',
+                        bmoYellow: '#F8DE59',
+                        bmoRed: '#E73A4F',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        retro: ['VT323', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #1a1a2e; color: #fff; }
+        
+        /* Estilo do Botão Arcade Físico 3D */
+        .arcade-button {
+            background-color: #F8DE59;
+            border: 4px solid #1D2323;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            box-shadow: 0 10px 0 #b3a03d, 0 15px 15px rgba(0,0,0,0.5);
+            transition: all 0.1s;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1D2323;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            font-size: 14px;
+        }
+        .arcade-button:active {
+            transform: translateY(10px);
+            box-shadow: 0 0px 0 #b3a03d, 0 5px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Estilo do Celular Virtual */
+        .phone-mockup {
+            border: 12px solid #333;
+            border-radius: 40px;
+            overflow: hidden;
+            background-color: #5DC8B8;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background-color: #333;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 50;
+        }
+
+        /* Toggle Switch Customizado (App) */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #F8DE59;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #E73A4F;
+        }
+        
+        /* LEDs Físicos (Hardware) */
+        .led {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #4a4a4a;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+        .led.active-mist { background-color: #3b82f6; box-shadow: 0 0 15px #3b82f6, inset 0 2px 5px rgba(255,255,255,0.5); }
+        .led.active-exhaust { background-color: #8b5cf6; box-shadow: 0 0 15px #8b5cf6, inset 0 2px 5px rgba(255,255,255,0.5); }
+        .led.active-light { background-color: #fbbf24; box-shadow: 0 0 15px #fbbf24, inset 0 2px 5px rgba(255,255,255,0.5); }
+
+        /* Animação da Água e do Aspersor */
+        .water-fill {
+            transition: height 1s linear, background-color 0.5s ease;
+        }
+        @keyframes spray {
+            0% { opacity: 0; transform: translateY(0) scale(1); }
+            50% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateY(-20px) scale(1.5); }
+        }
+        .mist-particle { animation: spray 1.5s infinite; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="p-4 md:p-8 font-sans">
+    
+    <header class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-black text-bmoTeal drop-shadow-md">
+            <i class="fa-solid fa-flask text-bmoGreen mr-2"></i> Simulador B.M.O. 
+        </h1>
+        <p class="text-gray-400 mt-2">Teste a integração entre a Bancada (Arduino) e o App React Native em tempo real.</p>
+    </header>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        
+        <!-- MUNDO FÍSICO -->
+        <section class="bg-gray-800 rounded-3xl p-6 shadow-2xl border-4 border-gray-700">
+            <h2 class="text-2xl font-bold mb-6 text-gray-200 border-b border-gray-600 pb-2">
+                <i class="fa-solid fa-microchip mr-2"></i> Bancada de Hardware
+            </h2>
+
+            <!-- Sensores (Inputs simulados pelo usuário) -->
+            <div class="bg-gray-900 rounded-xl p-4 mb-6">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Simulador do Sensor DHT</h3>
+                
+                <div class="mb-4">
+                    <label class="flex justify-between text-sm font-bold mb-2">
+                        <span>Temperatura Ambiente</span>
+                        <span id="hw-temp-val" class="text-bmoYellow">24.5°C</span>
+                    </label>
+                    <input type="range" id="hw-temp" min="15" max="35" step="0.5" value="24.5" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-bmoYellow">
+                </div>
+
+                <div>
+                    <label class="flex justify-between text-sm font-bold mb-2">
+                        <span>Umidade Ambiente</span>
+                        <span id="hw-hum-val" class="text-bmoTeal">85%</span>
+                    </label>
+                    <input type="range" id="hw-hum" min="30" max="100" step="1" value="85" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-bmoTeal">
+                </div>
+            </div>
+
+            <!-- Visualização da Estufa e Atuadores -->
+            <div class="flex flex-col sm:flex-row gap-6 mb-6">
+                <!-- Estufa / Reservatório -->
+                <div class="flex-1 bg-gray-900 rounded-xl p-4 flex flex-col items-center justify-end relative overflow-hidden h-48">
+                    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                    
+                    <div id="visual-mist" class="absolute top-4 text-blue-300 opacity-0 transition-opacity duration-300 flex gap-2">
+                        <i class="fa-solid fa-droplet mist-particle" style="animation-delay: 0s;"></i>
+                        <i class="fa-solid fa-droplet mist-particle" style="animation-delay: 0.5s;"></i>
+                        <i class="fa-solid fa-droplet mist-particle" style="animation-delay: 0.2s;"></i>
+                    </div>
+
+                    <div class="text-center z-10 font-retro text-2xl mb-2 drop-shadow-md">Água: <span id="hw-water-val">100%</span></div>
+                    
+                    <div class="w-full h-20 bg-gray-800 rounded-b-lg border-2 border-gray-600 relative overflow-hidden">
+                        <div id="hw-water-fill" class="absolute bottom-0 left-0 right-0 bg-blue-500 opacity-80 water-fill h-full"></div>
+                    </div>
+                </div>
+
+                <!-- Painel de Relés e Botão -->
+                <div class="flex-1 bg-gray-900 rounded-xl p-4 flex flex-col items-center justify-between">
+                    <div class="w-full flex justify-around mb-4 bg-gray-800 p-3 rounded-lg">
+                        <div class="flex flex-col items-center">
+                            <div id="led-mist" class="led mb-1 active-mist"></div>
+                            <span class="text-xs text-gray-400">Relé Névoa</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="led-exhaust" class="led mb-1"></div>
+                            <span class="text-xs text-gray-400">Relé Exaust.</span>
+                        </div>
+                    </div>
+
+                    <button onclick="refillWater()" class="arcade-button" title="Aperte para encher a água">
+                        Reabastecer<br>Água
+                    </button>
+                    <p class="text-xs text-gray-500 mt-4 text-center">Botão Arcade Físico</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MUNDO SOFTWARE -->
+        <section class="flex justify-center items-center">
+            <div class="phone-mockup w-[320px] h-[650px] flex flex-col relative text-bmoDark">
+                <div class="phone-notch"></div>
+                
+                <!-- Notificação do App -->
+                <div id="app-alert" class="absolute top-12 left-4 right-4 bg-white rounded-2xl shadow-xl p-4 z-50 transform -translate-y-[150%] transition-transform duration-300">
+                    <div class="flex items-center text-bmoRed font-bold mb-1">
+                        <i class="fa-solid fa-triangle-exclamation mr-2"></i> ALERTA B.M.O.
+                    </div>
+                    <p class="text-sm font-medium mb-3">O nível de água está muito baixo! Reabasteça o reservatório na bancada.</p>
+                    <button onclick="dismissAlert()" class="w-full bg-gray-200 py-2 rounded-lg font-bold">Entendido!</button>
+                </div>
+
+                <div class="flex-1 pt-12 p-5 overflow-y-auto no-scrollbar">
+                    
+                    <!-- Tela Verde do BMO -->
+                    <div class="bg-bmoGreen rounded-[20px] p-4 border-[6px] border-bmoDark mb-6 shadow-lg relative">
+                        <div class="absolute top-0 right-0 w-1/2 h-full bg-white opacity-10 rounded-tr-[14px] rounded-br-[14px] pointer-events-none transform -skew-x-12 translate-x-4"></div>
+                        
+                        <h2 class="font-retro text-2xl font-bold text-center uppercase tracking-widest mb-3 text-bmoDark">
+                            Monitoramento
+                        </h2>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-white/40 p-2 rounded-lg border-2 border-transparent flex flex-col items-center">
+                                <span class="text-[10px] font-bold uppercase">Temp.</span>
+                                <span id="app-temp" class="text-xl font-black mt-1">24.5°C</span>
+                            </div>
+                            <div class="bg-white/40 p-2 rounded-lg border-2 border-transparent flex flex-col items-center">
+                                <span class="text-[10px] font-bold uppercase">Umidade</span>
+                                <span id="app-hum" class="text-xl font-black mt-1">85%</span>
+                            </div>
+                            <div id="app-water-card" class="bg-white/40 p-2 rounded-lg border-2 border-transparent flex flex-col items-center col-span-2 transition-colors duration-300">
+                                <span class="text-[10px] font-bold uppercase">Nível de Água</span>
+                                <span id="app-water" class="text-2xl font-black mt-1">100%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controles Manuais -->
+                    <h3 class="font-bold text-lg mb-3">Atuadores Manuais</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-black/10 p-4 rounded-xl">
+                            <span class="font-bold"><i class="fa-solid fa-cloud-showers-water mr-2"></i> Aspersor</span>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                                <input type="checkbox" name="toggleMist" id="toggleMist" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-400 appearance-none cursor-pointer z-10 transition-all duration-300" checked/>
+                                <label for="toggleMist" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-400 cursor-pointer transition-colors duration-300"></label>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center bg-black/10 p-4 rounded-xl">
+                            <span class="font-bold"><i class="fa-solid fa-fan mr-2"></i> Exaustor</span>
+                            <div class="relative inline-block w-12 mr-2 align-middle select-none">
+                                <input type="checkbox" name="toggleExhaust" id="toggleExhaust" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-400 appearance-none cursor-pointer z-10 transition-all duration-300"/>
+                                <label for="toggleExhaust" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-400 cursor-pointer transition-colors duration-300"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // ESTADO GLOBAL DO SISTEMA
+        let state = {
+            temperature: 24.5,
+            humidity: 85,
+            waterLevel: 100,
+            actuators: { mist: true, exhaust: false }
+        };
+
+        let alertTriggered = false;
+        let alertDismissed = false;
+
+        // ELEMENTOS DO DOM
+        const hwTempInput = document.getElementById('hw-temp');
+        const hwTempVal = document.getElementById('hw-temp-val');
+        const hwHumInput = document.getElementById('hw-hum');
+        const hwHumVal = document.getElementById('hw-hum-val');
+        const hwWaterFill = document.getElementById('hw-water-fill');
+        const hwWaterVal = document.getElementById('hw-water-val');
+        const ledMist = document.getElementById('led-mist');
+        const ledExhaust = document.getElementById('led-exhaust');
+        const visualMist = document.getElementById('visual-mist');
+        
+        const appTemp = document.getElementById('app-temp');
+        const appHum = document.getElementById('app-hum');
+        const appWater = document.getElementById('app-water');
+        const appWaterCard = document.getElementById('app-water-card');
+        const appAlert = document.getElementById('app-alert');
+        const toggleMist = document.getElementById('toggleMist');
+        const toggleExhaust = document.getElementById('toggleExhaust');
+
+        // EVENTOS - Sensores Físicos
+        hwTempInput.addEventListener('input', (e) => {
+            state.temperature = parseFloat(e.target.value).toFixed(1);
+            hwTempVal.innerText = `${state.temperature}°C`;
+            updateAppSync();
+        });
+
+        hwHumInput.addEventListener('input', (e) => {
+            state.humidity = e.target.value;
+            hwHumVal.innerText = `${state.humidity}%`;
+            updateAppSync();
+        });
+
+        // EVENTOS - Botões do Aplicativo
+        toggleMist.addEventListener('change', (e) => {
+            state.actuators.mist = e.target.checked;
+            updateHardwareActuators();
+        });
+        
+        toggleExhaust.addEventListener('change', (e) => {
+            state.actuators.exhaust = e.target.checked;
+            updateHardwareActuators();
+        });
+
+        function updateAppSync() {
+            appTemp.innerText = `${state.temperature}°C`;
+            appHum.innerText = `${state.humidity}%`;
+            appWater.innerText = `${Math.floor(state.waterLevel)}%`;
+
+            if (state.waterLevel <= 20) {
+                appWaterCard.classList.remove('bg-white/40', 'border-transparent', 'text-bmoDark');
+                appWaterCard.classList.add('bg-[#FFD1D1]', 'border-bmoRed', 'text-bmoRed');
+                
+                if (!alertTriggered && !alertDismissed) {
+                    appAlert.style.transform = 'translateY(0)';
+                    alertTriggered = true;
+                }
+            } else {
+                appWaterCard.classList.add('bg-white/40', 'border-transparent', 'text-bmoDark');
+                appWaterCard.classList.remove('bg-[#FFD1D1]', 'border-bmoRed', 'text-bmoRed');
+            }
+        }
+
+        function dismissAlert() {
+            appAlert.style.transform = 'translateY(-150%)';
+            alertDismissed = true;
+        }
+
+        function updateHardwareActuators() {
+            if (state.actuators.mist) {
+                ledMist.classList.add('active-mist');
+                visualMist.classList.remove('opacity-0');
+            } else {
+                ledMist.classList.remove('active-mist');
+                visualMist.classList.add('opacity-0');
+            }
+
+            if (state.actuators.exhaust) {
+                ledExhaust.classList.add('active-exhaust');
+            } else {
+                ledExhaust.classList.remove('active-exhaust');
+            }
+        }
+
+        window.refillWater = function() {
+            state.waterLevel = 100;
+            alertTriggered = false;
+            alertDismissed = false;
+            appAlert.style.transform = 'translateY(-150%)';
+            updateWaterVisuals();
+            updateAppSync();
+        }
+
+        function updateWaterVisuals() {
+            hwWaterVal.innerText = `${Math.floor(state.waterLevel)}%`;
+            hwWaterFill.style.height = `${state.waterLevel}%`;
+            
+            if (state.waterLevel <= 20) {
+                hwWaterFill.classList.replace('bg-blue-500', 'bg-red-500');
+            } else {
+                hwWaterFill.classList.replace('bg-red-500', 'bg-blue-500');
+            }
+        }
+
+        // Loop de simulação da água caindo
+        setInterval(() => {
+            if (state.actuators.mist && state.waterLevel > 0) {
+                state.waterLevel -= 2; // Gasta água a cada segundo
+                if (state.waterLevel < 0) state.waterLevel = 0;
+                
+                updateWaterVisuals();
+                updateAppSync();
+            }
+        }, 1000);
+
+        // Início
+        updateHardwareActuators();
+        updateAppSync();
+    </script>
+</body>
+</html>
