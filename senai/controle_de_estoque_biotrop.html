@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biotrop CAMM 3 - Controle de Estoque Firebase</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        biotrop: {
+                            green: {
+                                50: '#f0fdf4',
+                                100: '#dcfce7',
+                                500: '#22c55e',
+                                600: '#16a34a',
+                                700: '#15803d', // Verde Corporativo Principal
+                                800: '#166534',
+                                900: '#14532d',
+                            },
+                            beige: {
+                                50: '#fafaf9', // Fundo off-white
+                                100: '#f5f5f4',
+                            }
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafaf9; /* Bege muito claro */
+        }
+
+        .modal-enter {
+            animation: fadeInScale 0.2s ease-out forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-stone-800 selection:bg-biotrop-green-200">
+
+    <header class="bg-biotrop-green-800 text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="bg-white p-2 rounded-xl shadow-sm">
+                    <i class="ph ph-package text-3xl text-biotrop-green-700"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight">BIOTROP <span class="font-light">CAMM 3</span></h1>
+                    <p class="text-biotrop-green-200 text-xs font-bold tracking-widest uppercase">Estoque em Tempo Real</p>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-1/2 relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="ph ph-magnifying-glass text-2xl text-biotrop-green-700"></i>
+                </div>
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="block w-full pl-12 pr-4 py-4 border-4 border-transparent rounded-2xl text-xl font-medium text-stone-900 bg-white placeholder-stone-400 focus:outline-none focus:ring-0 focus:border-biotrop-green-400 transition-all shadow-md"
+                    placeholder="Buscar por peça, código ou localização..."
+                />
+            </div>
+
+            <button onclick="window.openAddModal()" class="hidden md:flex items-center gap-2 bg-biotrop-green-600 hover:bg-biotrop-green-500 text-white px-6 py-4 rounded-2xl font-bold transition-colors shadow-md border border-biotrop-green-500">
+                <i class="ph ph-plus-circle text-2xl"></i>
+                Nova Peça
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 pb-32">
+        
+        <!-- Status de Conexão Firebase -->
+        <div class="flex justify-between items-end mb-6">
+            <h2 class="text-2xl font-black text-stone-800 flex items-center gap-2">
+                Categorias
+                <button id="clearCategoryBtn" class="hidden ml-2 text-sm bg-stone-200 hover:bg-stone-300 text-stone-700 px-4 py-1.5 rounded-full flex items-center gap-1 transition-colors font-bold">
+                    Limpar <i class="ph ph-x"></i>
+                </button>
+            </h2>
+            <div id="connectionStatus" class="flex items-center gap-2 text-sm font-bold text-amber-600 bg-amber-50 px-4 py-2 rounded-full border border-amber-200 shadow-sm">
+                <i class="ph-fill ph-spinner animate-spin text-lg"></i> Conectando...
+            </div>
+        </div>
+
+        <section class="mb-10">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3" id="categoriesContainer">
+                <!-- Injetado via JS -->
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-black text-stone-800 mb-6" id="inventoryCount">
+                Itens Cadastrados (0)
+            </h2>
+            
+            <div id="inventoryContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards renderizados aqui via JS -->
+            </div>
+
+            <!-- Estado Vazio -->
+            <div id="emptyState" class="hidden bg-white rounded-3xl p-12 text-center border border-stone-200 shadow-sm mt-6">
+                <i class="ph ph-package text-6xl text-stone-300 mx-auto mb-4 block"></i>
+                <h3 class="text-2xl font-bold text-stone-600">Nenhuma peça encontrada</h3>
+                <p class="text-stone-500 mt-2 font-medium">Tente buscar por outro termo ou cadastre um novo item.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Botão Flutuante Mobile para Adicionar Peça -->
+    <button onclick="window.openAddModal()" class="md:hidden fixed bottom-6 right-6 w-16 h-16 bg-biotrop-green-600 text-white rounded-full flex items-center justify-center shadow-2xl border-4 border-white hover:bg-biotrop-green-700 transition-transform active:scale-95 z-40">
+        <i class="ph ph-plus text-3xl font-bold"></i>
+    </button>
+
+    <div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden modal-enter my-8">
+            <div class="p-6 text-white bg-biotrop-green-700 flex justify-between items-center">
+                <h3 class="text-2xl font-black flex items-center gap-2">
+                    <i class="ph ph-cube"></i> Cadastrar Nova Peça
+                </h3>
+                <button onclick="window.closeAddModal()" class="text-white/80 hover:text-white bg-white/20 p-2 rounded-full transition-colors">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <form id="addItemForm" class="p-6 sm:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Nome -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Nome da Peça *</label>
+                        <input type="text" id="formNome" required placeholder="Ex: Contator Trifásico WEG" class="w-full p-4 bg-stone-50 border-2 border-stone-200 rounded-xl font-medium focus:border-biotrop-green-500 focus:ring-0 transition-all outline-none" />
+                    </div>
+                    
+                    <!-- Código / SKU -->
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Código Interno / SKU *</label>
+                        <input type="text" id="formSku" required placeholder="Ex: ELE-001" class="w-full p-4 bg-stone-50 border-2 border-stone-200 rounded-xl font-medium focus:border-biotrop-green-500 focus:ring-0 transition-all outline-none" />
+                    </div>
+
+                    <!-- Categoria -->
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Categoria *</label>
+                        <select id="formCategoria" required class="w-full p-4 bg-stone-50 border-2 border-stone-200 rounded-xl font-medium focus:border-biotrop-green-500 focus:ring-0 transition-all outline-none">
+                            <option value="">Selecione...</option>
+                            <option value="Elétrica">Componentes Elétricos</option>
+                            <option value="Pneumática">Componentes Pneumáticos</option>
+                            <option value="Mecânica">Componentes Mecânicos</option>
+                            <option value="Fixação">Elementos de Fixação</option>
+                            <option value="Eletrônica">Equipamentos Eletrônicos</option>
+                            <option value="Ferramentas">Ferramentas & Consumíveis</option>
+                        </select>
+                    </div>
+
+                    <!-- Especificação -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Especificação Técnica</label>
+                        <input type="text" id="formSpecs" placeholder="Ex: 32A 24VDC CWB32, M8x20mm..." class="w-full p-4 bg-stone-50 border-2 border-stone-200 rounded-xl font-medium focus:border-biotrop-green-500 focus:ring-0 transition-all outline-none" />
+                    </div>
+
+                    <!-- Localização -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-stone-700 mb-2 flex items-center gap-1">
+                            <i class="ph-fill ph-map-pin text-amber-500"></i> Localização Exata Física *
+                        </label>
+                        <input type="text" id="formLocal" required placeholder="Ex: Corredor A > Estante 3 > Gaveta 12" class="w-full p-4 bg-amber-50 border-2 border-amber-200 rounded-xl font-medium focus:border-amber-500 focus:ring-0 transition-all outline-none text-amber-900" />
+                    </div>
+
+                    <!-- Quantidades -->
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Qtd. Atual *</label>
+                        <input type="number" id="formQty" required min="0" value="0" class="w-full p-4 bg-stone-50 border-2 border-stone-200 rounded-xl text-xl font-black focus:border-biotrop-green-500 focus:ring-0 transition-all outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-2">Qtd. Mínima (Alerta) *</label>
+                        <input type="number" id="formMinQty" required min="0" value="5" class="w-full p-4 bg-stone-50 border-2 border-stone-200 rounded-xl text-xl font-black focus:border-biotrop-green-500 focus:ring-0 transition-all outline-none" />
+                    </div>
+                </div>
+
+                <div class="flex gap-4 mt-8 pt-6 border-t border-stone-100">
+                    <button type="button" onclick="window.closeAddModal()" class="flex-1 py-4 font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btnSubmitAdd" class="flex-1 py-4 font-black text-white bg-biotrop-green-600 hover:bg-biotrop-green-700 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-check"></i> Salvar Peça
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const userfirebaseConfig = {
+  apiKey: "AIzaSyCsEIS8RLFMy9p8kQXMRulHshBVrUsjlgA",
+  authDomain: "manut-camm3.firebaseapp.com",
+  projectId: "manut-camm3",
+  storageBucket: "manut-camm3.firebasestorage.app",
+  messagingSenderId: "1036619380992",
+  appId: "1:1036619380992:web:70e90c5e7d59d3977b1be5",
+  measurementId: "G-VRHZJ0PGWY"
+};
+
+        // Lógica para rodar perfeitamente neste ambiente de teste OU no seu servidor.
+        const envConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const firebaseConfig = Object.keys(userFirebaseConfig).length > 0 ? userFirebaseConfig : envConfig;
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'biotrop-estoque';
+
+        // Estado da Aplicação
+        let state = {
+            inventory: [],
+            searchTerm: '',
+            activeCategory: null
+        };
+
+        // Dados de Categorias (Visuais)
+        const categoriesMap = {
+            'Elétrica': { icon: 'ph-lightning', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', name: 'Componentes Elétricos' },
+            'Pneumática': { icon: 'ph-wind', color: 'bg-sky-100 text-sky-700 border-sky-200', name: 'Componentes Pneumáticos' },
+            'Mecânica': { icon: 'ph-gear', color: 'bg-slate-200 text-slate-700 border-slate-300', name: 'Componentes Mecânicos' },
+            'Fixação': { icon: 'ph-link', color: 'bg-stone-200 text-stone-700 border-stone-300', name: 'Elementos de Fixação' },
+            'Eletrônica': { icon: 'ph-cpu', color: 'bg-purple-100 text-purple-700 border-purple-200', name: 'Equipamentos Eletrônicos' },
+            'Ferramentas': { icon: 'ph-wrench', color: 'bg-orange-100 text-orange-700 border-orange-200', name: 'Ferramentas' },
+        };
+
+        let db, auth, itemsCollectionRef;
+
+        async function initApp() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    updateConnectionStatus(false, "Faltam Credenciais Firebase");
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Autenticação Obrigatória antes de acessar dados
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Definindo a Coleção correta 
+                // NOTA: Se você for rodar fora deste ambiente de teste, você pode mudar para:
+                // itemsCollectionRef = collection(db, 'estoque');
+                itemsCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'estoque');
+
+                // Escutar mudanças em TEMPO REAL (O coração do app)
+                onSnapshot(itemsCollectionRef, (snapshot) => {
+                    state.inventory = [];
+                    snapshot.forEach((doc) => {
+                        state.inventory.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    // Ordena por nome localmente
+                    state.inventory.sort((a, b) => a.nome.localeCompare(b.nome));
+                    
+                    renderCategories();
+                    renderInventory();
+                    updateConnectionStatus(true);
+                }, (error) => {
+                    console.error("Erro no onSnapshot:", error);
+                    updateConnectionStatus(false, "Erro de Sincronização");
+                });
+
+                setupEventListeners();
+
+            } catch (error) {
+                console.error("Erro Fatal na Inicialização:", error);
+                updateConnectionStatus(false, "Erro Crítico de Conexão");
+            }
+        }
+
+        function updateConnectionStatus(isConnected, msg = "") {
+            const statusEl = document.getElementById('connectionStatus');
+            if (isConnected) {
+                statusEl.className = "flex items-center gap-2 text-sm font-bold text-biotrop-green-700 bg-biotrop-green-50 px-4 py-2 rounded-full border border-biotrop-green-200 shadow-sm";
+                statusEl.innerHTML = `<i class="ph-fill ph-check-circle text-lg"></i> Online (Tempo Real)`;
+            } else {
+                statusEl.className = "flex items-center gap-2 text-sm font-bold text-red-600 bg-red-50 px-4 py-2 rounded-full border border-red-200 shadow-sm";
+                statusEl.innerHTML = `<i class="ph-fill ph-warning-circle text-lg"></i> ${msg || 'Desconectado'}`;
+            }
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = Object.entries(categoriesMap).map(([key, cat]) => {
+                const isActive = state.activeCategory === key;
+                return `
+                    <button
+                        onclick="window.toggleCategory('${key}')"
+                        class="flex flex-col items-center justify-center p-4 rounded-3xl border-2 transition-all duration-200
+                        ${isActive 
+                            ? 'border-biotrop-green-600 bg-biotrop-green-50 shadow-md transform scale-105' 
+                            : `bg-white hover:border-biotrop-green-300 border-stone-200`
+                        }"
+                    >
+                        <div class="p-3 rounded-2xl mb-3 ${cat.color} bg-opacity-50">
+                            <i class="ph-fill ${cat.icon} text-3xl"></i>
+                        </div>
+                        <span class="text-xs font-bold text-center leading-tight text-stone-700">
+                            ${cat.name}
+                        </span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('inventoryContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            const filtered = state.inventory.filter(item => {
+                const searchLower = state.searchTerm.toLowerCase();
+                const matchSearch = state.searchTerm === '' || 
+                    (item.nome || '').toLowerCase().includes(searchLower) || 
+                    (item.sku || '').toLowerCase().includes(searchLower) || 
+                    (item.especificacao || '').toLowerCase().includes(searchLower) ||
+                    (item.localizacao || '').toLowerCase().includes(searchLower);
+                
+                const matchCategory = !state.activeCategory || item.categoria === state.activeCategory;
+                
+                return matchSearch && matchCategory;
+            });
+
+            document.getElementById('inventoryCount').textContent = `Itens Cadastrados (${filtered.length})`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            container.innerHTML = filtered.map(item => {
+                const qty = parseInt(item.quantidade) || 0;
+                const minQty = parseInt(item.quantidadeMinima) || 0;
+                const isLowStock = qty <= minQty;
+                
+                // Pega dados da categoria, ou usa um genérico
+                const catData = categoriesMap[item.categoria] || { icon: 'ph-package', color: 'bg-stone-200 text-stone-700' };
+
+                return `
+                    <div class="relative bg-white rounded-3xl p-6 border-2 transition-all hover:shadow-xl flex flex-col h-full ${isLowStock ? 'border-red-400 bg-red-50/40' : 'border-stone-200'}">
+                        
+                        ${isLowStock ? `
+                        <div class="absolute -top-3 -right-3 bg-red-500 text-white px-4 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-md z-10 animate-pulse">
+                            <i class="ph-bold ph-warning"></i> ESTOQUE BAIXO
+                        </div>
+                        ` : ''}
+
+                        <div class="flex gap-4 mb-5">
+                            <div class="w-16 h-16 rounded-2xl flex-shrink-0 flex items-center justify-center ${catData.color}">
+                                <i class="ph-fill ${catData.icon} text-3xl"></i>
+                            </div>
+                            
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[11px] font-black text-stone-500 mb-1 uppercase tracking-widest truncate">${item.sku}</p>
+                                <h3 class="text-xl font-black text-stone-800 leading-tight mb-1 line-clamp-2" title="${item.nome}">${item.nome}</h3>
+                                <p class="text-sm font-medium text-stone-500 truncate" title="${item.especificacao}">${item.especificacao}</p>
+                            </div>
+                        </div>
+
+                        <!-- Mapeamento Físico -->
+                        <div class="bg-amber-50 border-2 border-amber-200/60 rounded-xl p-3.5 mb-5 flex items-start gap-3">
+                            <i class="ph-fill ph-map-pin text-2xl text-amber-500 mt-0.5 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-[10px] text-amber-700/80 font-black uppercase mb-1 tracking-wider">Localização Física</p>
+                                <p class="text-sm font-bold text-amber-900 leading-tight">${item.localizacao}</p>
+                            </div>
+                        </div>
+
+                        <!-- Usabilidade Extrema: Botões Gigantes -->
+                        <div class="mt-auto pt-5 border-t-2 border-stone-100 flex items-center justify-between">
+                            <div>
+                                <p class="text-[11px] text-stone-400 font-black uppercase tracking-wider mb-1">Em Estoque</p>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-4xl font-black ${isLowStock ? 'text-red-600' : 'text-stone-800'}">${qty}</span>
+                                    <span class="text-sm font-medium text-stone-400">/ mín ${minQty}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button onclick="window.updateQuantity('${item.id}', -1)" class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white active:scale-90 transition-all shadow-sm border border-red-200" title="Remover 1">
+                                    <i class="ph-bold ph-minus text-3xl"></i>
+                                </button>
+                                <button onclick="window.updateQuantity('${item.id}', 1)" class="w-14 h-14 bg-biotrop-green-100 text-biotrop-green-700 rounded-2xl flex items-center justify-center hover:bg-biotrop-green-600 hover:text-white active:scale-90 transition-all shadow-sm border border-biotrop-green-200" title="Adicionar 1">
+                                    <i class="ph-bold ph-plus text-3xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setupEventListeners() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                state.searchTerm = e.target.value;
+                renderInventory();
+            });
+
+            document.getElementById('clearCategoryBtn').addEventListener('click', () => {
+                window.toggleCategory(null);
+            });
+
+            // Lógica do Formulário de Cadastro (addDoc)
+            document.getElementById('addItemForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const btnSubmit = document.getElementById('btnSubmitAdd');
+                const originalText = btnSubmit.innerHTML;
+                btnSubmit.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Salvando...';
+                btnSubmit.disabled = true;
+
+                const novoItem = {
+                    nome: document.getElementById('formNome').value.trim(),
+                    sku: document.getElementById('formSku').value.trim(),
+                    categoria: document.getElementById('formCategoria').value,
+                    especificacao: document.getElementById('formSpecs').value.trim(),
+                    localizacao: document.getElementById('formLocal').value.trim(),
+                    quantidade: parseInt(document.getElementById('formQty').value) || 0,
+                    quantidadeMinima: parseInt(document.getElementById('formMinQty').value) || 0,
+                    dataCadastro: new Date().toISOString()
+                };
+
+                try {
+                    // Usando addDoc para criar um novo documento com ID automático
+                    await addDoc(itemsCollectionRef, novoItem);
+                    window.closeAddModal();
+                    document.getElementById('addItemForm').reset();
+                } catch (error) {
+                    console.error("Erro ao cadastrar peça: ", error);
+                    alert("Erro ao salvar a peça. Verifique sua conexão.");
+                } finally {
+                    btnSubmit.innerHTML = originalText;
+                    btnSubmit.disabled = false;
+                }
+            });
+        }
+
+        // Funções Globais expostas para o HTML
+        window.toggleCategory = (categoryName) => {
+            if (state.activeCategory === categoryName || categoryName === null) {
+                state.activeCategory = null;
+                document.getElementById('clearCategoryBtn').classList.add('hidden');
+            } else {
+                state.activeCategory = categoryName;
+                document.getElementById('clearCategoryBtn').classList.remove('hidden');
+            }
+            renderCategories();
+            renderInventory();
+        };
+
+        // Função de extrema usabilidade: updateDoc direto pelo clique
+        window.updateQuantity = async (id, change) => {
+            const item = state.inventory.find(i => i.id === id);
+            if (!item) return;
+
+            const newQty = parseInt(item.quantidade) + change;
+            if (newQty < 0) return; // Não permite estoque negativo
+
+            try {
+                // Referência exata ao documento da peça no banco
+                const docRef = doc(itemsCollectionRef, id);
+                
+                // Atualiza apenas o campo quantidade (o onSnapshot fará a tela piscar sozinha!)
+                await updateDoc(docRef, {
+                    quantidade: newQty
+                });
+            } catch (error) {
+                console.error("Erro ao atualizar quantidade:", error);
+            }
+        };
+
+        // Controle do Modal de Cadastro
+        window.openAddModal = () => {
+            const modal = document.getElementById('addModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => document.getElementById('formNome').focus(), 100);
+        };
+
+        window.closeAddModal = () => {
+            const modal = document.getElementById('addModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        // Iniciar
+        window.onload = initApp;
+
+    </script>
+</body>
+</html>
