@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="pt-BR" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biotrop CAMM 3 - Gestão Profissional de Estoque</title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#15803d">
+    <link rel="apple-touch-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQl4jA6jDbDnf1N0eiR1xPKkhwMrsDvveVOiMm0lcsZow&s=10">
+
+    <!-- Bibliotecas Externas (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Configuração Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        biotrop: {
+                            50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0',
+                            300: '#86efac', 400: '#4ade80', 500: '#22c55e',
+                            600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d',
+                        },
+                        dark: {
+                            bg: '#121212', card: '#1e1e1e', border: '#333333'
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        /* Variáveis Globais de Acessibilidade */
+        :root {
+            --app-bg-color: #fafaf9;
+            --app-font-size: 16px;
+        }
+
+        html.dark { --app-bg-color: #121212; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--app-bg-color); 
+            font-size: var(--app-font-size);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Animações e Utilitários */
+        .modal-enter { animation: fadeInScale 0.2s ease-out forwards; }
+        .slide-in { animation: slideIn 0.3s ease-out forwards; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        input[type="file"] { display: none; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="text-stone-800 dark:text-stone-200 selection:bg-biotrop-200">
+
+    <!-- =================================================================== -->
+    <!-- TELA DE LOGIN (Autenticação Corporativa)                            -->
+    <!-- =================================================================== -->
+    <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-biotrop-900 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] p-4">
+        <div class="bg-white dark:bg-dark-card w-full max-w-md rounded-3xl shadow-2xl p-8 border-t-8 border-biotrop-500 fade-in">
+            <div class="flex justify-center mb-6">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQl4jA6jDbDnf1N0eiR1xPKkhwMrsDvveVOiMm0lcsZow&s=10" alt="Logo" class="h-16">
+            </div>
+            <h2 class="text-2xl font-black text-center text-stone-800 dark:text-white mb-2">Acesso Restrito</h2>
+            <p class="text-center text-stone-500 dark:text-stone-400 mb-8 font-medium">CAMM 3 - Portal de Manutenção</p>
+            
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">E-mail Corporativo</label>
+                    <input type="email" id="loginEmail" required placeholder="ex: usuario@biotrop.com.br" class="w-full p-4 bg-stone-50 dark:bg-dark-bg border-2 border-stone-200 dark:border-dark-border rounded-xl font-medium outline-none focus:border-biotrop-500 transition-all dark:text-white" />
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Senha</label>
+                    <input type="password" id="loginPwd" required placeholder="••••••••" class="w-full p-4 bg-stone-50 dark:bg-dark-bg border-2 border-stone-200 dark:border-dark-border rounded-xl font-medium outline-none focus:border-biotrop-500 transition-all dark:text-white" />
+                </div>
+                <button type="submit" id="btnLogin" class="w-full py-4 font-black text-white bg-biotrop-700 hover:bg-biotrop-600 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 mt-4">
+                    <i class="ph-bold ph-sign-in"></i> Entrar
+                </button>
+                <p id="loginError" class="text-red-500 text-sm font-bold text-center mt-2 hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- APLICAÇÃO PRINCIPAL (Visível após Login)                            -->
+    <!-- =================================================================== -->
+    <div id="mainApp" class="hidden fade-in min-h-screen flex flex-col">
+        
+        <!-- CABEÇALHO -->
+        <header class="bg-biotrop-800 text-white shadow-lg sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Logo -->
+                <div class="flex items-center justify-between w-full md:w-auto">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white p-2 rounded-xl shadow-sm"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQl4jA6jDbDnf1N0eiR1xPKkhwMrsDvveVOiMm0lcsZow&s=10" class="h-6"></div>
+                        <div><h1 class="text-xl font-black leading-tight tracking-wide">BIOTROP</h1></div>
+                    </div>
+                    <!-- Menu Mobile Btn -->
+                    <button onclick="window.openSettingsMenu()" aria-label="Menu" class="md:hidden p-2 bg-biotrop-700 rounded-lg hover:bg-biotrop-600 transition">
+                        <i class="ph-bold ph-list text-2xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Abas de Navegação -->
+                <div class="flex bg-biotrop-900/50 p-1 rounded-xl w-full md:w-auto overflow-hidden">
+                    <button onclick="window.switchTab('estoque')" id="tabEstoque" class="flex-1 md:px-6 py-2 rounded-lg bg-biotrop-700 font-bold text-sm shadow flex items-center justify-center gap-2 transition-all">
+                        <i class="ph-bold ph-package"></i> Operação (Estoque)
+                    </button>
+                    <button onclick="window.switchTab('dashboard')" id="tabDashboard" class="flex-1 md:px-6 py-2 rounded-lg text-biotrop-100 hover:bg-biotrop-700/50 font-bold text-sm flex items-center justify-center gap-2 transition-all">
+                        <i class="ph-bold ph-chart-bar"></i> Gestão (Dashboard)
+                    </button>
+                </div>
+
+                <!-- Ações do Cabeçalho -->
+                <div class="hidden md:flex items-center gap-3">
+                    <button onclick="window.openSettingsMenu()" aria-label="Acessibilidade" class="w-10 h-10 bg-biotrop-700 hover:bg-biotrop-600 rounded-xl flex items-center justify-center transition border border-biotrop-600">
+                        <i class="ph-fill ph-gear-six text-xl"></i>
+                    </button>
+                    <div class="w-px h-8 bg-biotrop-700 mx-2"></div>
+                    <span id="userEmailDisplay" class="text-xs font-bold text-biotrop-200"></span>
+                    <button onclick="window.logout()" class="p-2 bg-red-500/20 text-red-300 hover:bg-red-500 hover:text-white rounded-lg transition" title="Sair do Sistema">
+                        <i class="ph-bold ph-sign-out text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CORPO DAS ABAS -->
+        <main class="max-w-7xl w-full mx-auto px-4 py-6 flex-1 pb-32">
+            
+            <!-- ============================================== -->
+            <!-- ABA 1: OPERAÇÃO (ESTOQUE E FILTROS)            -->
+            <!-- ============================================== -->
+            <div id="viewEstoque" class="block fade-in">
+                
+                <!-- Barra de Busca e Ações Primárias -->
+                <div class="flex flex-col lg:flex-row gap-4 mb-6 items-center">
+                    <div class="w-full lg:flex-1 relative">
+                        <i class="ph ph-magnifying-glass absolute left-4 top-3.5 text-2xl text-biotrop-700 dark:text-stone-400"></i>
+                        <input type="text" id="searchInput" class="w-full pl-12 pr-4 py-3.5 border-4 border-transparent bg-white dark:bg-dark-card rounded-2xl font-medium text-stone-900 dark:text-white placeholder-stone-400 shadow-md focus:border-biotrop-400 outline-none transition-all" placeholder="Buscar peça, PN, aplicação ou local..." />
+                    </div>
+                    
+                    <div class="flex gap-3 w-full lg:w-auto">
+                        <!-- Toggle View -->
+                        <div class="flex bg-stone-200 dark:bg-stone-800 rounded-2xl p-1 shadow-inner h-[56px]">
+                            <button onclick="window.setViewMode('grid')" id="btnGrid" aria-label="Modo Cards" class="px-4 rounded-xl bg-white dark:bg-stone-600 shadow text-biotrop-700 dark:text-white transition">
+                                <i class="ph-bold ph-squares-four text-xl"></i>
+                            </button>
+                            <button onclick="window.setViewMode('list')" id="btnList" aria-label="Modo Lista" class="px-4 rounded-xl text-stone-500 hover:text-stone-800 dark:text-stone-400 transition">
+                                <i class="ph-bold ph-list-dashes text-xl"></i>
+                            </button>
+                        </div>
+                        <button onclick="window.openAddModal()" class="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-biotrop-600 hover:bg-biotrop-500 text-white px-6 h-[56px] rounded-2xl font-bold transition-all shadow-md">
+                            <i class="ph-bold ph-plus-circle text-2xl"></i> Nova Peça
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filtros de Categoria -->
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-xl font-black text-stone-800 dark:text-white flex items-center gap-2">
+                        Filtrar por Categoria
+                        <button id="clearCategoryBtn" class="hidden ml-2 text-xs bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full flex items-center gap-1 transition-colors font-bold">Limpar <i class="ph ph-x"></i></button>
+                    </h2>
+                    <div id="connectionStatus" class="hidden md:flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800 shadow-sm">
+                        <i class="ph-fill ph-spinner animate-spin"></i> Conectando...
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 lg:grid-cols-6 gap-3 mb-8" id="categoriesContainer"></div>
+
+                <!-- Lista de Itens -->
+                <h2 class="text-xl font-black text-stone-800 dark:text-white mb-4" id="inventoryCount">Itens Cadastrados (0)</h2>
+                <div id="inventoryContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden bg-white dark:bg-dark-card rounded-3xl p-12 text-center border border-stone-200 dark:border-dark-border shadow-sm mt-6">
+                    <i class="ph ph-package text-6xl text-stone-300 dark:text-stone-600 mx-auto mb-4 block"></i>
+                    <h3 class="text-2xl font-bold text-stone-600 dark:text-stone-300">Nenhum resultado</h3>
+                    <p class="text-stone-500 dark:text-stone-400 mt-2 font-medium">Não encontramos peças com esses filtros.</p>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- ABA 2: DASHBOARD E GESTÃO                      -->
+            <!-- ============================================== -->
+            <div id="viewDashboard" class="hidden fade-in">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-black text-stone-800 dark:text-white">Inteligência Gerencial</h2>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <label class="cursor-pointer flex-1 md:flex-none flex items-center justify-center gap-2 bg-stone-100 dark:bg-dark-card hover:bg-stone-200 text-stone-700 dark:text-stone-200 px-5 py-3 rounded-xl font-bold transition shadow border border-stone-200 dark:border-dark-border">
+                            <i class="ph-bold ph-upload-simple text-xl"></i> Importar
+                            <input type="file" id="excelUpload" accept=".xlsx, .xls, .csv">
+                        </label>
+                        <button onclick="window.exportToExcel()" class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-900 px-5 py-3 rounded-xl font-bold hover:bg-stone-700 transition shadow">
+                            <i class="ph-bold ph-download-simple text-xl"></i> Relatório ERP
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white dark:bg-dark-card p-6 rounded-3xl border border-stone-200 dark:border-dark-border shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 bg-biotrop-100 text-biotrop-700 rounded-2xl flex items-center justify-center text-3xl"><i class="ph-fill ph-cubes"></i></div>
+                        <div><p class="text-xs font-bold text-stone-500 uppercase">Total de SKUs</p><p id="kpiTotal" class="text-3xl font-black text-stone-800 dark:text-white">0</p></div>
+                    </div>
+                    <div class="bg-white dark:bg-dark-card p-6 rounded-3xl border border-red-200 dark:border-red-900/30 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-3xl"><i class="ph-fill ph-warning-circle"></i></div>
+                        <div><p class="text-xs font-bold text-red-500 uppercase">Peças em Ruptura</p><p id="kpiRuptura" class="text-3xl font-black text-red-600">0</p></div>
+                    </div>
+                    <div class="bg-white dark:bg-dark-card p-6 rounded-3xl border border-blue-200 dark:border-blue-900/30 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl"><i class="ph-fill ph-activity"></i></div>
+                        <div><p class="text-xs font-bold text-blue-500 uppercase">Movimentações Hoje</p><p id="kpiMovimentos" class="text-3xl font-black text-blue-600">0</p></div>
+                    </div>
+                </div>
+
+                <!-- Log de Auditoria -->
+                <div class="bg-white dark:bg-dark-card rounded-3xl border border-stone-200 dark:border-dark-border overflow-hidden shadow-sm">
+                    <div class="p-6 border-b border-stone-100 dark:border-dark-border">
+                        <h3 class="text-lg font-bold text-stone-800 dark:text-white flex items-center gap-2"><i class="ph-bold ph-list-magnifying-glass"></i> Log de Auditoria (Recentes)</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-stone-50 dark:bg-stone-800/50 text-xs uppercase text-stone-500 font-bold border-b border-stone-200 dark:border-dark-border">
+                                    <th class="p-4 pl-6">Data / Hora</th>
+                                    <th class="p-4">Matrícula/Usuário</th>
+                                    <th class="p-4">Item Alterado</th>
+                                    <th class="p-4 text-center pr-6">Operação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody" class="text-sm font-medium text-stone-700 dark:text-stone-300">
+                                <!-- Preenchido dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MENU LATERAL DE CONFIGURAÇÕES (ACESSIBILIDADE)                      -->
+    <!-- =================================================================== -->
+    <div id="settingsMenu" class="fixed inset-0 z-50 hidden bg-stone-900/60 backdrop-blur-sm justify-end">
+        <div class="bg-white dark:bg-dark-bg w-full max-w-sm h-full shadow-2xl slide-in flex flex-col">
+            <div class="p-6 bg-stone-100 dark:bg-dark-card flex justify-between items-center border-b border-stone-200 dark:border-dark-border">
+                <h3 class="text-xl font-black text-stone-800 dark:text-white flex items-center gap-2"><i class="ph-fill ph-sliders-horizontal"></i> Preferências</h3>
+                <button onclick="window.closeSettingsMenu()" class="text-stone-500 hover:text-stone-800 dark:hover:text-white bg-stone-200 dark:bg-stone-800 p-2 rounded-full transition"><i class="ph ph-x text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 flex-1 overflow-y-auto space-y-8">
+                <!-- Tema -->
+                <div>
+                    <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">Aparência</h4>
+                    <div class="flex gap-2">
+                        <button onclick="window.setTheme('light')" class="flex-1 py-3 px-4 rounded-xl border-2 border-stone-200 bg-white font-bold text-stone-700 flex flex-col items-center gap-2 hover:border-biotrop-500">
+                            <i class="ph-fill ph-sun text-2xl text-amber-500"></i> Claro
+                        </button>
+                        <button onclick="window.setTheme('dark')" class="flex-1 py-3 px-4 rounded-xl border-2 border-stone-700 bg-stone-900 font-bold text-white flex flex-col items-center gap-2 hover:border-biotrop-500">
+                            <i class="ph-fill ph-moon text-2xl text-blue-400"></i> Escuro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cor de Fundo -->
+                <div>
+                    <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">Cor de Fundo (Acessibilidade)</h4>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="bgColorPicker" onchange="window.setCustomBg(this.value)" class="w-12 h-12 rounded cursor-pointer border-none p-0">
+                        <button onclick="window.resetBg()" class="text-sm font-bold text-stone-600 dark:text-stone-300 bg-stone-200 dark:bg-stone-800 px-4 py-2 rounded-lg">Restaurar Padrão</button>
+                    </div>
+                </div>
+
+                <!-- Tamanho da Fonte -->
+                <div>
+                    <h4 class="text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">Tamanho da Fonte</h4>
+                    <div class="flex items-center gap-2 bg-stone-100 dark:bg-dark-card p-2 rounded-xl">
+                        <button onclick="window.setFontSize('14px')" class="flex-1 py-2 font-medium text-sm text-stone-700 dark:text-stone-300 hover:bg-white dark:hover:bg-stone-700 rounded-lg">A-</button>
+                        <button onclick="window.setFontSize('16px')" class="flex-1 py-2 font-bold text-base text-stone-800 dark:text-white bg-white dark:bg-stone-600 shadow rounded-lg">Padrão</button>
+                        <button onclick="window.setFontSize('20px')" class="flex-1 py-2 font-black text-lg text-stone-900 dark:text-white hover:bg-white dark:hover:bg-stone-700 rounded-lg">A+</button>
+                    </div>
+                </div>
+
+                <!-- Ações Mobile -->
+                <div class="md:hidden pt-6 border-t border-stone-200 dark:border-dark-border flex flex-col gap-3">
+                    <span id="userEmailMobile" class="text-xs font-bold text-stone-500 text-center"></span>
+                    <button onclick="window.logout()" class="w-full flex justify-center items-center gap-2 py-3 bg-red-100 dark:bg-red-900/30 text-red-600 font-bold rounded-xl"><i class="ph-bold ph-sign-out text-xl"></i> Sair do Sistema</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 1: CADASTRAR/EDITAR COMPONENTE                                -->
+    <!-- =================================================================== -->
+    <div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white dark:bg-dark-bg rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden modal-enter my-8 border border-stone-200 dark:border-dark-border">
+            <div class="p-6 text-white bg-biotrop-700 flex justify-between items-center">
+                <h3 id="modalTitleText" class="text-2xl font-black flex items-center gap-2"><i class="ph ph-cube"></i> Cadastrar Componente</h3>
+                <button onclick="window.closeAddModal()" class="text-white/80 hover:text-white bg-white/20 p-2 rounded-full transition-colors"><i class="ph ph-x text-xl"></i></button>
+            </div>
+
+            <form id="addItemForm" class="p-6 sm:p-8">
+                <input type="hidden" id="formItemId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Nome da Peça *</label>
+                        <input type="text" id="formNome" required placeholder="Ex: Contator Tripolar" class="w-full p-4 bg-stone-50 dark:bg-dark-card border-2 border-stone-200 dark:border-stone-700 rounded-xl font-medium text-stone-900 dark:text-white focus:border-biotrop-500 outline-none transition-all" />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Código (PN) *</label>
+                        <input type="text" id="formCodigo" required placeholder="Ex: CWB32" class="w-full p-4 bg-stone-50 dark:bg-dark-card border-2 border-stone-200 dark:border-stone-700 rounded-xl font-medium text-stone-900 dark:text-white focus:border-biotrop-500 outline-none transition-all uppercase" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Categoria *</label>
+                        <select id="formCategoria" required class="w-full p-4 bg-stone-50 dark:bg-dark-card border-2 border-stone-200 dark:border-stone-700 rounded-xl font-medium text-stone-900 dark:text-white focus:border-biotrop-500 outline-none transition-all">
+                            <option value="">Selecione...</option>
+                            <option value="Elétrica">Componentes Elétricos</option><option value="Pneumática">Componentes Pneumáticos</option>
+                            <option value="Mecânica">Componentes Mecânicos</option><option value="Fixação">Elementos de Fixação</option>
+                            <option value="Eletrônica">Equipamentos Eletrônicos</option><option value="Ferramentas">Ferramentas & Consumíveis</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Especificação Técnica</label>
+                        <input type="text" id="formSpecs" placeholder="Ex: 24VDC, M8x20mm..." class="w-full p-4 bg-stone-50 dark:bg-dark-card border-2 border-stone-200 dark:border-stone-700 rounded-xl font-medium text-stone-900 dark:text-white focus:border-biotrop-500 outline-none transition-all" />
+                    </div>
+
+                    <div class="md:col-span-1">
+                        <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2 flex items-center gap-1"><i class="ph-fill ph-factory text-biotrop-500"></i> Aplicação</label>
+                        <input type="text" id="formAplicacao" placeholder="Ex: Esteira 02" class="w-full p-4 bg-stone-50 dark:bg-dark-card border-2 border-stone-200 dark:border-stone-700 rounded-xl font-medium text-stone-900 dark:text-white focus:border-biotrop-500 outline-none transition-all" />
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2 flex items-center gap-1"><i class="ph-fill ph-map-pin text-amber-500"></i> Localização Exata *</label>
+                        <input type="text" id="formLocal" required placeholder="Ex: Corredor A > Estante 3" class="w-full p-4 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-700/50 rounded-xl font-medium text-amber-900 dark:text-amber-100 focus:border-amber-500 outline-none transition-all" />
+                    </div>
+
+                    <!-- Quantidades e Unidade -->
+                    <div class="md:col-span-3 grid grid-cols-3 gap-4 pt-4 border-t border-stone-100 dark:border-dark-border">
+                        <div>
+                            <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Qtd. Atual</label>
+                            <input type="number" id="formQty" required min="0" value="0" class="w-full p-4 bg-stone-50 dark:bg-dark-card border-2 border-stone-200 dark:border-stone-700 rounded-xl text-xl font-black text-stone-900 dark:text-white focus:border-biotrop-500 outline-none text-center" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Qtd. Mínima</label>
+                            <input type="number" id="formMinQty" required min="0" value="5" class="w-full p-4 bg-stone-50 dark:bg-dark-card border-2 border-stone-200 dark:border-stone-700 rounded-xl text-xl font-black text-stone-900 dark:text-white focus:border-biotrop-500 outline-none text-center" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Unidade</label>
+                            <select id="formUnidade" required class="w-full p-4 bg-stone-50 dark:bg-dark-card border-2 border-stone-200 dark:border-stone-700 rounded-xl font-bold text-stone-900 dark:text-white focus:border-biotrop-500 outline-none text-center">
+                                <option value="un">un</option><option value="pc">pç</option><option value="m">m</option><option value="kg">kg</option><option value="cx">cx</option><option value="l">l</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 mt-8 pt-6 border-t border-stone-100 dark:border-dark-border">
+                    <button type="button" onclick="window.closeAddModal()" class="flex-1 py-4 font-bold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 rounded-xl transition">Cancelar</button>
+                    <button type="submit" id="btnSubmitAdd" class="flex-1 py-4 font-black text-white bg-biotrop-600 hover:bg-biotrop-700 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-check"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODAL 2: CONFIRMAR EXCLUSÃO                                         -->
+    <!-- =================================================================== -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-stone-900/80 backdrop-blur-sm">
+        <div class="bg-white dark:bg-dark-bg rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden modal-enter p-6 text-center border border-stone-200 dark:border-dark-border">
+            <div class="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50 dark:border-red-900/10">
+                <i class="ph-fill ph-warning-circle text-4xl text-red-500"></i>
+            </div>
+            <h3 class="text-2xl font-black text-stone-800 dark:text-white mb-2">Atenção!</h3>
+            <p class="text-stone-600 dark:text-stone-400 font-medium mb-1">Você está prestes a excluir o item:</p>
+            <p id="deleteItemName" class="text-lg font-bold text-red-600 dark:text-red-400 mb-8 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl break-words"></p>
+            
+            <div class="flex gap-3">
+                <button type="button" onclick="window.closeDeleteModal()" class="flex-1 py-4 font-bold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 rounded-xl transition">Cancelar</button>
+                <button type="button" id="btnConfirmDelete" class="flex-1 py-4 font-black text-white bg-red-500 hover:bg-red-600 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-trash"></i> Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- LÓGICA CORE (FIREBASE, UI STATE, CRUD)                              -->
+    <!-- =================================================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsEIS8RLFMy9p8kQXMRulHshBVrUsjlgA",
+            authDomain: "manut-camm3.firebaseapp.com",
+            projectId: "manut-camm3",
+            storageBucket: "manut-camm3.firebasestorage.app",
+            messagingSenderId: "1036619380992",
+            appId: "1:1036619380992:web:70e90c5e7d59d3977b1be5",
+            measurementId: "G-VRHZJ0PGWY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        let state = {
+            inventory: [],
+            currentUser: null,
+            searchTerm: '',
+            activeCategory: null,
+            viewMode: 'grid',
+        };
+
+        const categoriesMap = {
+            'Elétrica': { icon: 'ph-lightning', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400', name: 'Elétrica' },
+            'Pneumática': { icon: 'ph-wind', color: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400', name: 'Pneumática' },
+            'Mecânica': { icon: 'ph-gear', color: 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300', name: 'Mecânica' },
+            'Fixação': { icon: 'ph-link', color: 'bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-400', name: 'Fixação' },
+            'Eletrônica': { icon: 'ph-cpu', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', name: 'Eletrônica' },
+            'Ferramentas': { icon: 'ph-wrench', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400', name: 'Ferramentas' },
+        };
+
+        let itemToDeleteId = null;
+
+        // 1. AUTENTICAÇÃO E INICIALIZAÇÃO
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                state.currentUser = user;
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('flex');
+                document.getElementById('userEmailDisplay').textContent = user.email;
+                document.getElementById('userEmailMobile').textContent = user.email;
+                initApp();
+            } else {
+                state.currentUser = null;
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('flex');
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnLogin');
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Autenticando...';
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPwd').value);
+            } catch (error) {
+                const errEl = document.getElementById('loginError');
+                errEl.textContent = "Acesso Negado: Credenciais inválidas.";
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Entrar';
+            }
+        });
+
+        window.logout = () => signOut(auth);
+
+        function initApp() {
+            // Load Preferences
+            if(localStorage.getItem('theme') === 'dark') window.setTheme('dark');
+            if(localStorage.getItem('viewMode')) window.setViewMode(localStorage.getItem('viewMode'));
+
+            // Escuta Estoque (Real-time)
+            onSnapshot(collection(db, 'estoque'), (snapshot) => {
+                state.inventory = [];
+                let emRuptura = 0;
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    state.inventory.push({ id: doc.id, ...data });
+                    if ((parseInt(data.quantidade) || 0) <= (parseInt(data.quantidadeMinima) || 0)) emRuptura++;
+                });
+                state.inventory.sort((a, b) => a.nome.localeCompare(b.nome));
+                
+                // KPIs
+                document.getElementById('kpiTotal').textContent = state.inventory.length;
+                document.getElementById('kpiRuptura').textContent = emRuptura;
+                
+                renderCategories();
+                renderInventory();
+                updateConnectionStatus(true);
+            }, (error) => updateConnectionStatus(false));
+
+            // Escuta Logs (Últimas 30 movimentações)
+            onSnapshot(query(collection(db, 'historico'), orderBy('data', 'desc'), limit(30)), (snapshot) => {
+                const tbody = document.getElementById('logsTableBody');
+                tbody.innerHTML = '';
+                let movHoje = 0;
+                const hoje = new Date().toDateString();
+
+                snapshot.forEach((doc) => {
+                    const log = doc.data();
+                    const logDate = new Date(log.data);
+                    if (logDate.toDateString() === hoje) movHoje++;
+
+                    const tipo = log.alteracao > 0 ? `<span class="text-biotrop-600 bg-biotrop-100 px-2 py-1 rounded font-bold">+${log.alteracao} (Entrada)</span>` : `<span class="text-red-600 bg-red-100 px-2 py-1 rounded font-bold">${log.alteracao} (Saída)</span>`;
+                    
+                    tbody.innerHTML += `
+                        <tr class="border-b border-stone-100 dark:border-dark-border hover:bg-stone-50 dark:hover:bg-stone-800/30 transition">
+                            <td class="p-4 pl-6 whitespace-nowrap">${logDate.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</td>
+                            <td class="p-4 font-bold text-stone-800 dark:text-stone-200">${log.usuario.split('@')[0]}</td>
+                            <td class="p-4">${log.nomeItem}</td>
+                            <td class="p-4 text-center pr-6">${tipo}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('kpiMovimentos').textContent = movHoje;
+            });
+            
+            setupEventListeners();
+        }
+
+        function updateConnectionStatus(isConnected) {
+            const el = document.getElementById('connectionStatus');
+            el.className = isConnected 
+                ? "hidden md:flex items-center gap-2 text-xs font-bold text-biotrop-700 bg-biotrop-50 dark:bg-biotrop-900/20 dark:text-biotrop-400 px-3 py-1.5 rounded-full border border-biotrop-200 dark:border-biotrop-800 shadow-sm"
+                : "hidden md:flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-full border border-red-200 shadow-sm";
+            el.innerHTML = isConnected ? `<i class="ph-fill ph-check-circle"></i> Online` : `<i class="ph-fill ph-warning-circle"></i> Offline`;
+        }
+
+        // 2. RENDERIZAÇÃO E FILTROS
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = Object.entries(categoriesMap).map(([key, cat]) => {
+                const isActive = state.activeCategory === key;
+                return `
+                    <button onclick="window.toggleCategory('${key}')" class="flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${isActive ? 'border-biotrop-600 bg-biotrop-50 dark:bg-biotrop-900/20 shadow-md scale-105' : 'bg-white dark:bg-dark-card border-stone-200 dark:border-dark-border hover:border-biotrop-300'}">
+                        <div class="p-2 rounded-xl mb-2 ${cat.color}"><i class="ph-fill ${cat.icon} text-2xl"></i></div>
+                        <span class="text-[10px] md:text-xs font-bold text-center text-stone-700 dark:text-stone-300 w-full truncate">${cat.name}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('inventoryContainer');
+            const emptyState = document.getElementById('emptyState');
+            
+            const filtered = state.inventory.filter(item => {
+                const term = state.searchTerm.toLowerCase();
+                const matchSearch = term === '' || (item.nome||'').toLowerCase().includes(term) || (item.codigo||'').toLowerCase().includes(term) || (item.localizacao||'').toLowerCase().includes(term) || (item.aplicacao||'').toLowerCase().includes(term);
+                const matchCat = !state.activeCategory || item.categoria === state.activeCategory;
+                return matchSearch && matchCat;
+            });
+
+            document.getElementById('inventoryCount').textContent = `Itens Encontrados (${filtered.length})`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+            
+            container.className = state.viewMode === 'list' ? "flex flex-col gap-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+            
+            container.innerHTML = filtered.map(item => {
+                const qty = parseInt(item.quantidade) || 0;
+                const minQty = parseInt(item.quantidadeMinima) || 0;
+                const isLow = qty <= minQty;
+                const catData = categoriesMap[item.categoria] || { icon: 'ph-package', color: 'bg-stone-200' };
+                const appVisual = (item.aplicacao && item.aplicacao !== '-') ? `<span class="bg-biotrop-100 dark:bg-biotrop-900/30 text-biotrop-800 dark:text-biotrop-400 text-[10px] font-bold px-2 py-0.5 rounded border border-biotrop-200 dark:border-biotrop-800"><i class="ph-bold ph-factory"></i> ${item.aplicacao}</span>` : '';
+
+                if (state.viewMode === 'list') {
+                    // MODO LISTA
+                    return `
+                        <div class="relative bg-white dark:bg-dark-card rounded-2xl p-4 border-2 transition-all flex flex-col md:flex-row items-center gap-4 ${isLow ? 'border-red-400 bg-red-50/40 dark:bg-red-900/10' : 'border-stone-200 dark:border-dark-border'}">
+                            ${isLow ? `<div class="absolute -top-2 -left-2 w-4 h-4 rounded-full bg-red-500 shadow animate-pulse"></div>` : ''}
+                            <div class="flex items-center gap-4 flex-1 w-full min-w-0">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center ${catData.color}"><i class="ph-fill ${catData.icon} text-2xl"></i></div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-0.5"><h3 class="text-lg font-black text-stone-800 dark:text-white truncate">${item.nome}</h3> ${appVisual}</div>
+                                    <p class="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase truncate">PN: ${item.codigo||'-'} • LOC: <span class="text-amber-600 dark:text-amber-400">${item.localizacao}</span></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between w-full md:w-auto gap-4 mt-3 md:mt-0 pt-3 md:pt-0 border-t md:border-t-0 border-stone-100 dark:border-dark-border">
+                                <div class="text-center md:text-right min-w-[70px]">
+                                    <p class="text-2xl font-black ${isLow ? 'text-red-600' : 'text-stone-800 dark:text-white'} leading-none">${qty} <span class="text-xs text-stone-400">${item.unidade||'un'}</span></p>
+                                </div>
+                                <div class="flex gap-1">
+                                    <button onclick="window.openEditModal('${item.id}')" class="w-10 h-10 bg-sky-50 dark:bg-sky-900/20 text-sky-600 rounded-xl flex items-center justify-center hover:bg-sky-500 hover:text-white transition"><i class="ph-bold ph-pencil-simple text-xl"></i></button>
+                                    <button onclick="window.updateQuantity('${item.id}', -1)" class="w-10 h-10 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="ph-bold ph-minus text-xl"></i></button>
+                                    <button onclick="window.updateQuantity('${item.id}', 1)" class="w-10 h-10 bg-biotrop-50 dark:bg-biotrop-900/20 text-biotrop-700 rounded-xl flex items-center justify-center hover:bg-biotrop-600 hover:text-white transition"><i class="ph-bold ph-plus text-xl"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // MODO GRID (Cards)
+                return `
+                    <div class="relative bg-white dark:bg-dark-card rounded-3xl p-6 border-2 transition-all hover:shadow-xl flex flex-col h-full ${isLow ? 'border-red-400 bg-red-50/40 dark:bg-red-900/10' : 'border-stone-200 dark:border-dark-border'}">
+                        ${isLow ? `<div class="absolute -top-3 -right-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-black shadow z-10 animate-pulse">BAIXO</div>` : ''}
+                        <div class="flex gap-4 mb-3">
+                            <div class="w-16 h-16 rounded-2xl flex items-center justify-center ${catData.color}"><i class="ph-fill ${catData.icon} text-3xl"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest truncate">PN: ${item.codigo||'-'}</p>
+                                <h3 class="text-xl font-black text-stone-800 dark:text-white leading-tight mb-1 line-clamp-2">${item.nome}</h3>
+                                ${appVisual}
+                            </div>
+                        </div>
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200/60 dark:border-amber-800/50 rounded-xl p-3 mb-5 mt-2 flex items-start gap-3">
+                            <i class="ph-fill ph-map-pin text-2xl text-amber-500 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-[10px] text-amber-700/80 dark:text-amber-500 font-black uppercase mb-0.5 tracking-wider">Localização</p>
+                                <p class="text-sm font-bold text-amber-900 dark:text-amber-100">${item.localizacao}</p>
+                            </div>
+                        </div>
+                        <div class="mt-auto pt-5 border-t-2 border-stone-100 dark:border-dark-border flex items-center justify-between gap-2">
+                            <div>
+                                <p class="text-[10px] text-stone-400 font-black uppercase tracking-wider mb-1">Estoque</p>
+                                <p class="text-4xl font-black ${isLow ? 'text-red-600' : 'text-stone-800 dark:text-white'}">${qty} <span class="text-sm font-medium text-stone-400">${item.unidade||'un'}</span></p>
+                            </div>
+                            <div class="flex gap-1.5 flex-wrap justify-end">
+                                <button onclick="window.openDeleteModal('${item.id}', '${item.nome.replace(/'/g, "\\'")}')" class="w-10 h-10 md:w-12 md:h-12 bg-stone-100 dark:bg-stone-800 text-stone-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="ph-bold ph-trash text-xl"></i></button>
+                                <button onclick="window.openEditModal('${item.id}')" class="w-10 h-10 md:w-12 md:h-12 bg-sky-50 dark:bg-sky-900/20 text-sky-600 rounded-xl flex items-center justify-center hover:bg-sky-500 hover:text-white transition"><i class="ph-bold ph-pencil-simple text-xl"></i></button>
+                                <button onclick="window.updateQuantity('${item.id}', -1)" class="w-10 h-10 md:w-12 md:h-12 bg-red-100 dark:bg-red-900/20 text-red-600 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="ph-bold ph-minus text-xl"></i></button>
+                                <button onclick="window.updateQuantity('${item.id}', 1)" class="w-10 h-10 md:w-12 md:h-12 bg-biotrop-100 dark:bg-biotrop-900/20 text-biotrop-700 rounded-xl flex items-center justify-center hover:bg-biotrop-600 hover:text-white transition"><i class="ph-bold ph-plus text-xl"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 3. CRUD COM LOG DE AUDITORIA
+        window.updateQuantity = async (id, change) => {
+            const item = state.inventory.find(i => i.id === id);
+            if (!item) return;
+            const newQty = parseInt(item.quantidade) + change;
+            if (newQty < 0) return; 
+
+            try {
+                await updateDoc(doc(db, "estoque", id), { quantidade: newQty });
+                await addDoc(collection(db, 'historico'), {
+                    itemId: id, nomeItem: item.nome, codigo: item.codigo||'-',
+                    alteracao: change, usuario: state.currentUser.email, data: new Date().toISOString()
+                });
+            } catch (error) { console.error(error); }
+        };
+
+        function setupEventListeners() {
+            // Busca Reativa
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                state.searchTerm = e.target.value; renderInventory();
+            });
+
+            // Submit Formulario (Cria/Edita)
+            document.getElementById('addItemForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('btnSubmitAdd');
+                const origTxt = btn.innerHTML;
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Salvando...'; btn.disabled = true;
+
+                const id = document.getElementById('formItemId').value;
+                const dados = {
+                    nome: document.getElementById('formNome').value.trim(),
+                    codigo: document.getElementById('formCodigo').value.trim(),
+                    categoria: document.getElementById('formCategoria').value,
+                    especificacao: document.getElementById('formSpecs').value.trim(),
+                    aplicacao: document.getElementById('formAplicacao').value.trim() || '-',
+                    localizacao: document.getElementById('formLocal').value.trim(),
+                    quantidade: parseInt(document.getElementById('formQty').value) || 0,
+                    quantidadeMinima: parseInt(document.getElementById('formMinQty').value) || 0,
+                    unidade: document.getElementById('formUnidade').value,
+                };
+
+                try {
+                    if(id) {
+                        await updateDoc(doc(db, "estoque", id), dados);
+                        await addDoc(collection(db, 'historico'), { itemId: id, nomeItem: dados.nome, codigo: dados.codigo, alteracao: 0, usuario: state.currentUser.email, data: new Date().toISOString(), nota: "Item Editado" });
+                    } else {
+                        const docRef = await addDoc(collection(db, 'estoque'), dados);
+                        await addDoc(collection(db, 'historico'), { itemId: docRef.id, nomeItem: dados.nome, codigo: dados.codigo, alteracao: dados.quantidade, usuario: state.currentUser.email, data: new Date().toISOString(), nota: "Item Criado" });
+                    }
+                    window.closeAddModal();
+                } catch (error) { alert("Erro ao salvar"); }
+                finally { btn.innerHTML = origTxt; btn.disabled = false; }
+            });
+
+            // Confirmar Exclusão
+            document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+                if(!itemToDeleteId) return;
+                const btn = document.getElementById('btnConfirmDelete');
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Excluindo...'; btn.disabled = true;
+                try {
+                    const item = state.inventory.find(i => i.id === itemToDeleteId);
+                    await deleteDoc(doc(db, "estoque", itemToDeleteId));
+                    await addDoc(collection(db, 'historico'), { itemId: itemToDeleteId, nomeItem: item?.nome||'Deletado', codigo: item?.codigo||'-', alteracao: 0, usuario: state.currentUser.email, data: new Date().toISOString(), nota: "Item Excluído" });
+                    window.closeDeleteModal();
+                } catch (error) { alert("Erro ao excluir."); }
+                finally { btn.innerHTML = '<i class="ph-bold ph-trash"></i> Excluir'; btn.disabled = false; }
+            });
+
+            // Importação em Lote via Excel
+            document.getElementById('excelUpload').addEventListener('change', (e) => {
+                const file = e.target.files[0]; if(!file) return;
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const itemsExcel = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    if(itemsExcel.length === 0) return alert("Planilha vazia.");
+                    if(!confirm(`Importar ${itemsExcel.length} itens do Excel?`)) return e.target.value = '';
+
+                    document.body.style.cursor = 'wait';
+                    for (const row of itemsExcel) {
+                        try {
+                            await addDoc(collection(db, 'estoque'), {
+                                nome: row['Nome'] || row['NOME'] || 'Sem nome', codigo: row['Código'] || row['Codigo'] || row['SKU'] || row['PN'] || '-', categoria: row['Categoria'] || 'Mecânica', especificacao: row['Especificação'] || row['Especificacao'] || '', aplicacao: row['Aplicação'] || row['Aplicacao'] || '-', localizacao: row['Localização'] || row['Localizacao'] || '-', quantidade: parseInt(row['Quantidade']) || parseInt(row['Qtd Atual']) || 0, quantidadeMinima: parseInt(row['Qtd Mínima']) || parseInt(row['Minima']) || 0, unidade: row['Unidade'] || row['UND'] || 'un'
+                            });
+                        } catch(err) { console.error("Linha ignorada"); }
+                    }
+                    document.body.style.cursor = 'default'; alert("Importação finalizada!"); e.target.value = ''; 
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // 4. EXPORTAÇÃO PARA ERP (.XLSX)
+        window.exportToExcel = () => {
+            if(state.inventory.length === 0) return alert("Não há dados.");
+            const dados = state.inventory.map(item => ({
+                "CÓDIGO (PN)": item.codigo || "-", "DESCRIÇÃO": item.nome, "ESPECIFICAÇÃO": item.especificacao || "-", "CATEGORIA": item.categoria, "APLICAÇÃO": item.aplicacao, "LOCALIZAÇÃO": item.localizacao, "QTD. ATUAL": item.quantidade, "UNIDADE": item.unidade || "un", "QTD. MÍNIMA": item.quantidadeMinima, "STATUS": parseInt(item.quantidade) <= parseInt(item.quantidadeMinima) ? "COMPRAR" : "OK"
+            }));
+            const ws = XLSX.utils.json_to_sheet(dados); const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventario_CAMM3");
+            XLSX.writeFile(wb, `Relatorio_Estoque_Biotrop_${new Date().toISOString().split('T')[0]}.xlsx`);
+        };
+
+        // 5. FUNÇÕES DE JANELA (UI/UX)
+        window.switchTab = (tab) => {
+            document.getElementById('viewEstoque').classList.toggle('hidden', tab !== 'estoque');
+            document.getElementById('viewDashboard').classList.toggle('hidden', tab !== 'dashboard');
+            document.getElementById('tabEstoque').className = tab === 'estoque' ? "flex-1 md:px-6 py-2 rounded-lg bg-biotrop-700 font-bold text-sm shadow flex justify-center gap-2" : "flex-1 md:px-6 py-2 rounded-lg text-biotrop-100 hover:bg-biotrop-700/50 font-bold text-sm flex justify-center gap-2";
+            document.getElementById('tabDashboard').className = tab === 'dashboard' ? "flex-1 md:px-6 py-2 rounded-lg bg-biotrop-700 font-bold text-sm shadow flex justify-center gap-2" : "flex-1 md:px-6 py-2 rounded-lg text-biotrop-100 hover:bg-biotrop-700/50 font-bold text-sm flex justify-center gap-2";
+        };
+
+        window.toggleCategory = (cat) => {
+            state.activeCategory = (state.activeCategory === cat) ? null : cat;
+            document.getElementById('clearCategoryBtn').classList.toggle('hidden', !state.activeCategory);
+            renderCategories(); renderInventory();
+        };
+
+        window.setViewMode = (mode) => {
+            state.viewMode = mode; localStorage.setItem('viewMode', mode);
+            document.getElementById('btnGrid').className = mode === 'grid' ? "px-4 rounded-xl bg-white dark:bg-stone-600 shadow text-biotrop-700 dark:text-white transition h-full" : "px-4 rounded-xl text-stone-500 hover:text-stone-800 dark:text-stone-400 transition h-full";
+            document.getElementById('btnList').className = mode === 'list' ? "px-4 rounded-xl bg-white dark:bg-stone-600 shadow text-biotrop-700 dark:text-white transition h-full" : "px-4 rounded-xl text-stone-500 hover:text-stone-800 dark:text-stone-400 transition h-full";
+            renderInventory();
+        };
+
+        // Acessibilidade (Settings)
+        window.openSettingsMenu = () => { document.getElementById('settingsMenu').classList.remove('hidden'); document.getElementById('settingsMenu').classList.add('flex'); };
+        window.closeSettingsMenu = () => document.getElementById('settingsMenu').classList.add('hidden');
+        window.setTheme = (theme) => { theme === 'dark' ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'); localStorage.setItem('theme', theme); };
+        window.setFontSize = (size) => document.documentElement.style.setProperty('--app-font-size', size);
+        window.setCustomBg = (color) => { document.documentElement.style.setProperty('--app-bg-color', color); document.documentElement.classList.remove('dark'); };
+        window.resetBg = () => { document.documentElement.style.removeProperty('--app-bg-color'); if(localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark'); };
+
+        // Modais de CRUD
+        window.openAddModal = () => {
+            document.getElementById('addItemForm').reset(); document.getElementById('formItemId').value = "";
+            document.getElementById('modalTitleText').innerHTML = '<i class="ph ph-cube"></i> Cadastrar Componente';
+            document.getElementById('addModal').classList.remove('hidden'); document.getElementById('addModal').classList.add('flex');
+            setTimeout(() => document.getElementById('formNome').focus(), 100);
+        };
+        window.openEditModal = (id) => {
+            const item = state.inventory.find(i => i.id === id); if (!item) return;
+            document.getElementById('formItemId').value = id;
+            document.getElementById('formNome').value = item.nome; document.getElementById('formCodigo').value = item.codigo;
+            document.getElementById('formCategoria').value = item.categoria; document.getElementById('formSpecs').value = item.especificacao || '';
+            document.getElementById('formAplicacao').value = item.aplicacao !== '-' ? item.aplicacao : ''; document.getElementById('formLocal').value = item.localizacao;
+            document.getElementById('formQty').value = item.quantidade; document.getElementById('formMinQty').value = item.quantidadeMinima; document.getElementById('formUnidade').value = item.unidade || 'un';
+            document.getElementById('modalTitleText').innerHTML = '<i class="ph ph-pencil-simple"></i> Editar Componente';
+            document.getElementById('addModal').classList.remove('hidden'); document.getElementById('addModal').classList.add('flex');
+        };
+        window.closeAddModal = () => document.getElementById('addModal').classList.add('hidden');
+        
+        window.openDeleteModal = (id, nome) => {
+            itemToDeleteId = id; document.getElementById('deleteItemName').textContent = nome;
+            const m = document.getElementById('deleteModal'); m.classList.remove('hidden'); m.classList.add('flex');
+        };
+        window.closeDeleteModal = () => { itemToDeleteId = null; document.getElementById('deleteModal').classList.add('hidden'); };
+
+    </script>
+    
+    <!-- REGISTRO DO SERVICE WORKER (Para PWA funcionar Offline) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW', err)); });
+        }
+    </script>
+</body>
+</html>
