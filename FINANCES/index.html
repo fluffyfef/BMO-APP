@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="cottagecore">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#4a5d4e" id="meta-theme-color" />
+  <title>Finanças Pessoais — Controle & Estética</title>
+
+  <!-- Fontes Google para suporte estético (Quicksand, Space Grotesk, Plus Jakarta Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Quicksand:wght@500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: 'var(--bg-primary)',
+            surface: 'var(--bg-surface)',
+            elevated: 'var(--bg-elevated)',
+            txt: 'var(--text-primary)',
+            muted: 'var(--text-muted)',
+            accent: 'var(--accent-primary)',
+            'accent-hover': 'var(--accent-hover)',
+            'accent-soft': 'var(--accent-soft)',
+            bordercol: 'var(--border-color)',
+            income: 'var(--color-income)',
+            expense: 'var(--color-expense)',
+          },
+          borderRadius: {
+            theme: 'var(--radius-theme)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ==========================================================================
+       SISTEMA DE TEMAS ESTÉTICOS E VARIÁVEIS NATIVAS
+       ========================================================================== */
+    :root, [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --text-primary: #0f172a;
+      --text-muted: #64748b;
+      --accent-primary: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-soft: #e0e7ff;
+      --border-color: #e2e8f0;
+      --color-income: #10b981;
+      --color-expense: #ef4444;
+      --radius-theme: 1rem;
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --shadow-theme: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #090d16;
+      --bg-surface: #111827;
+      --bg-elevated: #1f2937;
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-primary: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-soft: rgba(99, 102, 241, 0.15);
+      --border-color: #1f2937;
+      --color-income: #34d399;
+      --color-expense: #f87171;
+      --radius-theme: 1rem;
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --shadow-theme: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Tema Cottagecore: Tons de musgo, creme pergaminho, terracota e acolhimento */
+    [data-theme="cottagecore"] {
+      --bg-primary: #f4EFE6;
+      --bg-surface: #fbf9f5;
+      --bg-elevated: #ebe3d5;
+      --text-primary: #3b3026;
+      --text-muted: #7a6a58;
+      --accent-primary: #526b56;
+      --accent-hover: #3f5442;
+      --accent-soft: #dce5dd;
+      --border-color: #dcd1c0;
+      --color-income: #4d7c57;
+      --color-expense: #bc5449;
+      --radius-theme: 1.25rem;
+      --font-main: 'Quicksand', sans-serif;
+      --shadow-theme: 0 6px 18px -4px rgba(59, 48, 38, 0.08);
+    }
+
+    /* Tema Y2K Cyber: Rosa vibrante, estética retrô-futurista anos 2000, contrastes marcados */
+    [data-theme="y2k"] {
+      --bg-primary: #ffe6f7;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f5d0fe;
+      --text-primary: #240046;
+      --text-muted: #7b2cbf;
+      --accent-primary: #ff007f;
+      --accent-hover: #d9006c;
+      --accent-soft: #ffc2e2;
+      --border-color: #ff66b2;
+      --color-income: #00b4d8;
+      --color-expense: #ff0055;
+      --radius-theme: 0.5rem;
+      --font-main: 'Space Grotesk', sans-serif;
+      --shadow-theme: 4px 4px 0px #ff007f;
+    }
+
+    /* Tema Fairycore: Lavanda etéreo, verde menta mágico, tons pastéis suaves */
+    [data-theme="fairycore"] {
+      --bg-primary: #f6f0ff;
+      --bg-surface: #ffffff;
+      --bg-elevated: #ede2ff;
+      --text-primary: #3c2a4d;
+      --text-muted: #7f6799;
+      --accent-primary: #9d65c9;
+      --accent-hover: #834eb0;
+      --accent-soft: #f0e1ff;
+      --border-color: #e2cdf7;
+      --color-income: #4ea898;
+      --color-expense: #e06c88;
+      --radius-theme: 1.5rem;
+      --font-main: 'Quicksand', sans-serif;
+      --shadow-theme: 0 8px 24px -4px rgba(157, 101, 201, 0.14);
+    }
+
+    /* Controle de Escala Tipográfica (Acessibilidade) */
+    html[data-font-scale="sm"] { font-size: 14px; }
+    html[data-font-scale="md"] { font-size: 16px; }
+    html[data-font-scale="lg"] { font-size: 18px; }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.25s ease, color 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .theme-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-theme);
+      box-shadow: var(--shadow-theme);
+      transition: all 0.2s ease;
+    }
+
+    /* Estilização customizada da barra de rolagem */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 9999px; }
+
+    /* Animações suaves */
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up { animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col selection:bg-accent selection:text-white pb-24 md:pb-10">
+
+  <!-- ========================================================================
+       TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO / DEMO)
+       ======================================================================== -->
+  <section id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg overflow-y-auto">
+    <div class="theme-card w-full max-w-md p-6 sm:p-8 animate-slide-up">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-theme bg-accent text-white flex items-center justify-center text-2xl shadow-md">
+            <i class="ph-fill ph-plant"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold tracking-tight">Finanças & Estética</h1>
+            <p class="text-xs text-muted">Seu controle diário em segundos</p>
+          </div>
+        </div>
+        <button onclick="toggleDrawer(true)" class="p-2.5 rounded-theme bg-elevated text-txt hover:bg-accent-soft transition" title="Personalizar Tema">
+          <i class="ph ph-palette text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Aviso de status do Firebase -->
+      <div id="firebase-status-banner" class="mb-5 p-3.5 rounded-theme bg-accent-soft border border-bordercol text-xs flex items-start gap-2.5">
+        <i class="ph-fill ph-sparkle text-accent text-lg shrink-0 mt-0.5"></i>
+        <div>
+          <span class="font-semibold block text-txt">Pronto para Uso!</span>
+          <span class="text-muted">Conecte seu Firebase nas configurações ou entre com o <strong>Modo Demonstração</strong> abaixo para testar tudo imediatamente.</span>
+        </div>
+      </div>
+
+      <!-- Abas Login / Criar Conta -->
+      <div class="grid grid-cols-2 gap-1 p-1 bg-elevated rounded-theme mb-5 text-sm font-medium">
+        <button id="tab-login" onclick="switchAuthTab('login')" class="py-2 rounded-theme bg-surface text-txt shadow-sm transition">Entrar</button>
+        <button id="tab-register" onclick="switchAuthTab('register')" class="py-2 rounded-theme text-muted hover:text-txt transition">Criar Conta</button>
+      </div>
+
+      <form id="auth-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">E-mail</label>
+          <div class="relative">
+            <i class="ph ph-envelope-simple absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-lg"></i>
+            <input type="email" id="auth-email" required placeholder="seu@email.com"
+              class="w-full pl-10 pr-4 py-3 rounded-theme bg-elevated border border-bordercol text-txt focus:outline-none focus:border-accent transition" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">Senha</label>
+          <div class="relative">
+            <i class="ph ph-lock-key absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-lg"></i>
+            <input type="password" id="auth-password" required minlength="6" placeholder="••••••••"
+              class="w-full pl-10 pr-4 py-3 rounded-theme bg-elevated border border-bordercol text-txt focus:outline-none focus:border-accent transition" />
+          </div>
+        </div>
+
+        <button type="submit" id="auth-submit-btn"
+          class="w-full py-3.5 px-4 rounded-theme bg-accent hover:bg-accent-hover text-white font-semibold shadow-md transition flex items-center justify-center gap-2 min-h-[48px]">
+          <i class="ph-bold ph-sign-in text-lg"></i>
+          <span>Acessar Meu Painel</span>
+        </button>
+      </form>
+
+      <div class="relative my-6 flex items-center justify-center">
+        <div class="border-t border-bordercol w-full"></div>
+        <span class="bg-surface px-3 text-xs text-muted uppercase tracking-wider">ou</span>
+        <div class="border-t border-bordercol w-full"></div>
+      </div>
+
+      <div class="space-y-2.5">
+        <button onclick="startDemoMode()"
+          class="w-full py-3 px-4 rounded-theme bg-elevated hover:bg-accent-soft text-txt font-semibold border border-bordercol transition flex items-center justify-center gap-2 min-h-[48px]">
+          <i class="ph-fill ph-magic-wand text-accent text-lg"></i>
+          <span>Entrar no Modo Demonstração (Instantâneo)</span>
+        </button>
+
+        <button onclick="openFirebaseConfigModal()"
+          class="w-full py-2.5 px-4 rounded-theme text-xs text-muted hover:text-txt transition flex items-center justify-center gap-1.5">
+          <i class="ph ph-gear-six text-base"></i>
+          <span>Configurar Credenciais do Firebase (JSON)</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       APLICAÇÃO PRINCIPAL (HEADER + DASHBOARD + TRANSAÇÕES)
+       ======================================================================== -->
+  <div id="app-container" class="hidden flex-1 flex flex-col max-w-5xl w-full mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
+
+    <!-- CABEÇALHO SUPERIOR -->
+    <header class="flex items-center justify-between gap-3 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-theme bg-accent text-white flex items-center justify-center text-2xl shadow-sm shrink-0">
+          <i class="ph-fill ph-wallet"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight leading-tight">Meu Bolso</h1>
+            <span id="connection-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent-soft text-accent flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+              Sincronizado
+            </span>
+          </div>
+          <p id="user-display-email" class="text-xs text-muted truncate max-w-[180px] sm:max-w-xs">usuario@email.com</p>
+        </div>
+      </div>
+
+      <!-- Ações Rápidas Header -->
+      <div class="flex items-center gap-2">
+        <!-- Botão Nova Transação Desktop -->
+        <button onclick="openTransactionModal()"
+          class="hidden md:flex items-center gap-2 bg-accent hover:bg-accent-hover text-white font-semibold px-4 py-2.5 rounded-theme shadow-sm transition min-h-[44px]">
+          <i class="ph-bold ph-plus text-lg"></i>
+          <span>Novo Registro</span>
+        </button>
+
+        <!-- Botão de Personalização (Abre Drawer) -->
+        <button onclick="toggleDrawer(true)" aria-label="Preferências de Aparência"
+          class="p-2.5 rounded-theme theme-card hover:border-accent text-txt flex items-center gap-2 min-h-[44px] min-w-[44px] justify-center">
+          <i class="ph ph-sliders-horizontal text-xl text-accent"></i>
+          <span class="hidden sm:inline text-sm font-medium">Estética</span>
+        </button>
+
+        <!-- Botão Sair -->
+        <button onclick="handleLogout()" title="Sair da conta"
+          class="p-2.5 rounded-theme theme-card hover:text-expense text-muted flex items-center justify-center min-h-[44px] min-w-[44px]">
+          <i class="ph ph-sign-out text-xl"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- BARRA DE NAVEGAÇÃO DE MÊS / ANO E FILTROS -->
+    <div class="theme-card p-3 sm:p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <!-- Seletor de Mês -->
+      <div class="flex items-center justify-between w-full sm:w-auto gap-2">
+        <button onclick="changeMonth(-1)" class="p-2.5 rounded-theme bg-elevated hover:bg-accent-soft text-txt transition min-w-[44px] min-h-[44px] flex items-center justify-center" title="Mês Anterior">
+          <i class="ph-bold ph-caret-left text-lg"></i>
+        </button>
+
+        <div class="flex items-center gap-2 px-3 py-1.5 text-center">
+          <i class="ph-duotone ph-calendar-blank text-accent text-xl"></i>
+          <span id="current-month-label" class="font-bold text-base sm:text-lg capitalize min-w-[140px]">Outubro 2026</span>
+        </div>
+
+        <button onclick="changeMonth(1)" class="p-2.5 rounded-theme bg-elevated hover:bg-accent-soft text-txt transition min-w-[44px] min-h-[44px] flex items-center justify-center" title="Próximo Mês">
+          <i class="ph-bold ph-caret-right text-lg"></i>
+        </button>
+
+        <button onclick="resetToCurrentMonth()" class="text-xs font-semibold px-2.5 py-1.5 rounded-theme bg-accent-soft text-accent hover:opacity-80 transition">
+          Hoje
+        </button>
+      </div>
+
+      <!-- Busca e Alternância de Visualização (Cards vs Lista) -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="relative flex-1 sm:w-56">
+          <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-muted"></i>
+          <input type="text" id="search-input" oninput="renderApp()" placeholder="Buscar descrição..."
+            class="w-full pl-9 pr-3 py-2 text-sm rounded-theme bg-elevated border border-bordercol text-txt focus:outline-none focus:border-accent min-h-[42px]" />
+        </div>
+
+        <!-- Toggle Cards / Lista -->
+        <div class="flex items-center bg-elevated p-1 rounded-theme border border-bordercol shrink-0">
+          <button id="view-btn-cards" onclick="setViewMode('cards')" title="Visualização em Cards"
+            class="p-2 rounded-theme text-sm font-medium flex items-center gap-1 transition min-h-[36px] px-2.5">
+            <i class="ph-fill ph-squares-four text-lg"></i>
+            <span class="hidden md:inline">Cards</span>
+          </button>
+          <button id="view-btn-list" onclick="setViewMode('list')" title="Visualização em Lista (Extrato)"
+            class="p-2 rounded-theme text-sm font-medium flex items-center gap-1 transition min-h-[36px] px-2.5">
+            <i class="ph-bold ph-list-dashes text-lg"></i>
+            <span class="hidden md:inline">Lista</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         DASHBOARD GERENCIAL (3 KPIs VITAIS + BARRA DE DISTRIBUIÇÃO)
+         ====================================================================== -->
+    <section aria-label="Indicadores Financeiros do Mês" class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 mb-6">
+      <!-- KPI 1: Saldo Atual do Mês -->
+      <div class="theme-card p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-muted">Saldo do Mês</span>
+          <div class="w-9 h-9 rounded-theme bg-accent-soft text-accent flex items-center justify-center text-xl">
+            <i class="ph-duotone ph-scales"></i>
+          </div>
+        </div>
+        <div id="kpi-balance" class="text-2xl sm:text-3xl font-bold tracking-tight">R$ 0,00</div>
+        <div id="kpi-balance-sub" class="text-xs text-muted mt-1 flex items-center gap-1">
+          <span>Balanço líquido mensal</span>
+        </div>
+      </div>
+
+      <!-- KPI 2: Total de Receitas do Mês -->
+      <div class="theme-card p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-muted">Receitas no Mês</span>
+          <div class="w-9 h-9 rounded-theme bg-emerald-500/15 text-income flex items-center justify-center text-xl">
+            <i class="ph-bold ph-trend-up"></i>
+          </div>
+        </div>
+        <div id="kpi-income" class="text-2xl sm:text-3xl font-bold tracking-tight text-income">R$ 0,00</div>
+        <div id="kpi-income-sub" class="text-xs text-muted mt-1">0 entradas registradas</div>
+      </div>
+
+      <!-- KPI 3: Total de Despesas do Mês -->
+      <div class="theme-card p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-muted">Despesas no Mês</span>
+          <div class="w-9 h-9 rounded-theme bg-rose-500/15 text-expense flex items-center justify-center text-xl">
+            <i class="ph-bold ph-trend-down"></i>
+          </div>
+        </div>
+        <div id="kpi-expense" class="text-2xl sm:text-3xl font-bold tracking-tight text-expense">R$ 0,00</div>
+        <div id="kpi-expense-sub" class="text-xs text-muted mt-1">0 saídas registradas</div>
+      </div>
+    </section>
+
+    <!-- MINI-PAINEL VISUAL: PARA ONDE O DINHEIRO ESTÁ INDO -->
+    <section id="category-breakdown-card" class="theme-card p-4 sm:p-5 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-muted flex items-center gap-2">
+          <i class="ph-fill ph-chart-pie-slice text-accent text-base"></i>
+          <span>Para onde foi o dinheiro este mês</span>
+        </h2>
+        <span id="expense-commitment-badge" class="text-xs font-semibold text-muted">0% da renda comprometida</span>
+      </div>
+      <!-- Barra Multi-progresso -->
+      <div id="category-progress-bar" class="w-full h-3 bg-elevated rounded-full overflow-hidden flex gap-0.5 mb-3">
+        <div class="w-full h-full bg-elevated"></div>
+      </div>
+      <!-- Legenda de Categorias -->
+      <div id="category-legend" class="flex flex-wrap gap-2 text-xs"></div>
+    </section>
+
+    <!-- ======================================================================
+         FILTROS RÁPIDOS DE CATEGORIAS E STATUS
+         ====================================================================== -->
+    <div class="flex items-center justify-between gap-2 mb-4 overflow-x-auto pb-1.5 no-scrollbar">
+      <div id="category-pills" class="flex items-center gap-2">
+        <!-- Gerado dinamicamente via JS -->
+      </div>
+
+      <select id="status-filter" onchange="renderApp()"
+        class="px-3 py-2 rounded-theme bg-surface border border-bordercol text-xs font-semibold text-txt focus:outline-none focus:border-accent shrink-0 min-h-[38px]">
+        <option value="all">Status: Todos</option>
+        <option value="pago">✅ Pagos / Recebidos</option>
+        <option value="pendente">⏳ Pendentes</option>
+      </select>
+    </div>
+
+    <!-- ======================================================================
+         LISTAGEM DE TRANSAÇÕES (CARDS OU LISTA COMPACTA)
+         ====================================================================== -->
+    <main class="flex-1">
+      <div id="transactions-container"></div>
+
+      <!-- Estado Vazio (Empty State) -->
+      <div id="empty-state" class="hidden theme-card p-10 text-center my-4">
+        <div class="w-16 h-16 rounded-full bg-accent-soft text-accent flex items-center justify-center text-3xl mx-auto mb-3">
+          <i class="ph-duotone ph-sparkle"></i>
+        </div>
+        <h3 class="text-base font-bold mb-1">Nenhuma transação encontrada neste período</h3>
+        <p class="text-xs text-muted max-w-sm mx-auto mb-5">
+          Toque no botão <strong>+</strong> para registrar uma receita ou despesa em poucos segundos.
+        </p>
+        <button onclick="openTransactionModal()"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-theme bg-accent text-white text-sm font-semibold shadow-sm hover:bg-accent-hover transition">
+          <i class="ph-bold ph-plus"></i>
+          <span>Adicionar Primeira Transação</span>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ========================================================================
+       BOTÃO FLUTUANTE GIGANTE (FAB) PARA ENTRADA RÁPIDA NO MOBILE
+       ======================================================================== -->
+  <button id="fab-add" onclick="openTransactionModal()" aria-label="Nova Transação Rápida"
+    class="hidden fixed bottom-5 right-5 z-30 w-16 h-16 rounded-full bg-accent hover:bg-accent-hover text-white shadow-2xl flex items-center justify-center transition-transform active:scale-90 focus:outline-none ring-4 ring-accent/30">
+    <i class="ph-bold ph-plus text-3xl"></i>
+  </button>
+
+  <!-- ========================================================================
+       MODAL DE ENTRADA RÁPIDA (ADICIONAR / EDITAR TRANSAÇÃO)
+       ======================================================================== -->
+  <div id="transaction-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
+    <div class="theme-card w-full max-w-lg rounded-t-3xl sm:rounded-theme p-5 sm:p-6 max-h-[92vh] overflow-y-auto animate-slide-up">
+      <div class="flex items-center justify-between mb-4">
+        <h2 id="modal-title" class="text-lg font-bold flex items-center gap-2">
+          <i class="ph-duotone ph-Receipt text-accent text-xl"></i>
+          <span>Nova Transação</span>
+        </h2>
+        <button onclick="closeTransactionModal()" class="p-2 rounded-full bg-elevated text-muted hover:text-txt min-w-[40px] min-h-[40px] flex items-center justify-center">
+          <i class="ph-bold ph-x text-lg"></i>
+        </button>
+      </div>
+
+      <form id="transaction-form" class="space-y-4">
+        <input type="hidden" id="tx-id" value="" />
+
+        <!-- Seletor Grande: Despesa vs Receita -->
+        <div class="grid grid-cols-2 gap-2.5 p-1.5 bg-elevated rounded-theme">
+          <button type="button" id="btn-type-despesa" onclick="setFormType('despesa')"
+            class="py-3 rounded-theme font-bold text-sm flex items-center justify-center gap-2 transition min-h-[46px]">
+            <i class="ph-bold ph-arrow-circle-down text-lg"></i>
+            <span>Despesa</span>
+          </button>
+          <button type="button" id="btn-type-receita" onclick="setFormType('receita')"
+            class="py-3 rounded-theme font-bold text-sm flex items-center justify-center gap-2 transition min-h-[46px]">
+            <i class="ph-bold ph-arrow-circle-up text-lg"></i>
+            <span>Receita</span>
+          </button>
+        </div>
+
+        <!-- Valor em Destaque para Digitação Rápida -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Valor (R$)</label>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted text-lg">R$</span>
+            <input type="number" id="tx-valor" step="0.01" min="0.01" required placeholder="0,00" inputmode="decimal"
+              class="w-full pl-12 pr-4 py-3.5 text-2xl font-bold rounded-theme bg-elevated border border-bordercol text-txt focus:outline-none focus:border-accent" />
+          </div>
+        </div>
+
+        <!-- Descrição -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Descrição</label>
+          <input type="text" id="tx-descricao" required placeholder="Ex: Conta de Luz, iFood, Salário..."
+            class="w-full px-4 py-3 rounded-theme bg-elevated border border-bordercol text-txt focus:outline-none focus:border-accent min-h-[46px]" />
+        </div>
+
+        <!-- Categoria Obrigatória -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Categoria</label>
+          <select id="tx-categoria" required
+            class="w-full px-4 py-3 rounded-theme bg-elevated border border-bordercol text-txt focus:outline-none focus:border-accent min-h-[46px]">
+            <!-- Preenchido via JS com as 7 categorias obrigatórias -->
+          </select>
+        </div>
+
+        <!-- Data e Status lado a lado -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Data</label>
+            <input type="date" id="tx-data" required
+              class="w-full px-4 py-3 rounded-theme bg-elevated border border-bordercol text-txt focus:outline-none focus:border-accent min-h-[46px]" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-1">Status</label>
+            <div class="grid grid-cols-2 gap-2 bg-elevated p-1 rounded-theme border border-bordercol min-h-[46px]">
+              <button type="button" id="btn-status-pago" onclick="setFormStatus('pago')"
+                class="rounded-theme text-xs font-bold flex items-center justify-center gap-1 transition py-2">
+                <i class="ph-fill ph-check-circle"></i>
+                <span>Pago</span>
+              </button>
+              <button type="button" id="btn-status-pendente" onclick="setFormStatus('pendente')"
+                class="rounded-theme text-xs font-bold flex items-center justify-center gap-1 transition py-2">
+                <i class="ph-fill ph-clock"></i>
+                <span>Pendente</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center gap-2.5">
+          <button type="button" onclick="closeTransactionModal()"
+            class="w-1/3 py-3.5 rounded-theme bg-elevated text-muted font-semibold hover:text-txt transition min-h-[48px]">
+            Cancelar
+          </button>
+          <button type="submit" id="tx-save-btn"
+            class="w-2/3 py-3.5 rounded-theme bg-accent hover:bg-accent-hover text-white font-bold shadow-md transition flex items-center justify-center gap-2 min-h-[48px]">
+            <i class="ph-bold ph-check text-lg"></i>
+            <span>Salvar Registro</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       PAINEL LATERAL (DRAWER) DE PREFERÊNCIAS ESTÉTICAS E ACESSIBILIDADE
+       ======================================================================== -->
+  <div id="preferences-drawer" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div onclick="toggleDrawer(false)" class="fixed inset-0 bg-black/50 backdrop-blur-xs"></div>
+
+    <!-- Conteúdo Lateral -->
+    <aside class="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-surface border-l border-bordercol p-6 overflow-y-auto z-10 flex flex-col justify-between shadow-2xl">
+      <div>
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-bordercol">
+          <div class="flex items-center gap-2.5">
+            <i class="ph-fill ph-paint-brush-broad text-2xl text-accent"></i>
+            <div>
+              <h2 class="font-bold text-base">Estética & Acessibilidade</h2>
+              <p class="text-xs text-muted">Deixe o app com a sua cara</p>
+            </div>
+          </div>
+          <button onclick="toggleDrawer(false)" class="p-2 rounded-full bg-elevated text-muted hover:text-txt min-w-[40px] min-h-[40px] flex items-center justify-center">
+            <i class="ph-bold ph-x text-lg"></i>
+          </button>
+        </div>
+
+        <!-- 1. Seleção de Temas Estéticos -->
+        <div class="mb-6">
+          <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-2.5">Paleta / Tema Estético</label>
+          <div class="grid grid-cols-1 gap-2.5">
+            <button onclick="applyTheme('cottagecore')" data-theme-btn="cottagecore"
+              class="theme-option-btn p-3 rounded-theme border border-bordercol flex items-center justify-between hover:border-accent transition text-left">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">🍄</span>
+                <div>
+                  <div class="font-bold text-sm">Cottagecore</div>
+                  <div class="text-xs text-muted">Tons terrosos, verde musgo e papel</div>
+                </div>
+              </div>
+              <div class="flex gap-1">
+                <span class="w-4 h-4 rounded-full bg-[#f4EFE6] border border-stone-400"></span>
+                <span class="w-4 h-4 rounded-full bg-[#526b56]"></span>
+                <span class="w-4 h-4 rounded-full bg-[#bc5449]"></span>
+              </div>
+            </button>
+
+            <button onclick="applyTheme('fairycore')" data-theme-btn="fairycore"
+              class="theme-option-btn p-3 rounded-theme border border-bordercol flex items-center justify-between hover:border-accent transition text-left">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">🧚‍♀️</span>
+                <div>
+                  <div class="font-bold text-sm">Fairycore</div>
+                  <div class="text-xs text-muted">Lavanda suave, menta e magia pastel</div>
+                </div>
+              </div>
+              <div class="flex gap-1">
+                <span class="w-4 h-4 rounded-full bg-[#f6f0ff] border border-purple-300"></span>
+                <span class="w-4 h-4 rounded-full bg-[#9d65c9]"></span>
+                <span class="w-4 h-4 rounded-full bg-[#4ea898]"></span>
+              </div>
+            </button>
+
+            <button onclick="applyTheme('y2k')" data-theme-btn="y2k"
+              class="theme-option-btn p-3 rounded-theme border border-bordercol flex items-center justify-between hover:border-accent transition text-left">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">💿</span>
+                <div>
+                  <div class="font-bold text-sm">Y2K Cyber</div>
+                  <div class="text-xs text-muted">Rosa vibrante, ciano e alto contraste</div>
+                </div>
+              </div>
+              <div class="flex gap-1">
+                <span class="w-4 h-4 rounded-full bg-[#ffe6f7] border border-pink-400"></span>
+                <span class="w-4 h-4 rounded-full bg-[#ff007f]"></span>
+                <span class="w-4 h-4 rounded-full bg-[#00b4d8]"></span>
+              </div>
+            </button>
+
+            <div class="grid grid-cols-2 gap-2.5 pt-1">
+              <button onclick="applyTheme('light')" data-theme-btn="light"
+                class="theme-option-btn p-3 rounded-theme border border-bordercol flex items-center gap-2 hover:border-accent transition">
+                <i class="ph-fill ph-sun text-amber-500 text-lg"></i>
+                <span class="font-bold text-sm">Claro</span>
+              </button>
+              <button onclick="applyTheme('dark')" data-theme-btn="dark"
+                class="theme-option-btn p-3 rounded-theme border border-bordercol flex items-center gap-2 hover:border-accent transition">
+                <i class="ph-fill ph-moon-stars text-indigo-400 text-lg"></i>
+                <span class="font-bold text-sm">Escuro</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Acessibilidade: Tamanho da Fonte -->
+        <div class="mb-6">
+          <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-2.5">Tamanho da Fonte (Acessibilidade)</label>
+          <div class="grid grid-cols-3 gap-2 bg-elevated p-1.5 rounded-theme border border-bordercol">
+            <button onclick="applyFontScale('sm')" id="font-btn-sm" class="py-2.5 rounded-theme font-bold text-xs transition min-h-[42px]">A- (Compacto)</button>
+            <button onclick="applyFontScale('md')" id="font-btn-md" class="py-2.5 rounded-theme font-bold text-sm transition min-h-[42px]">Padrão</button>
+            <button onclick="applyFontScale('lg')" id="font-btn-lg" class="py-2.5 rounded-theme font-bold text-base transition min-h-[42px]">A+ (Amplo)</button>
+          </div>
+        </div>
+
+        <!-- 3. Cor Exata do Fundo (Input Color) -->
+        <div class="mb-6">
+          <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Cor Personalizada de Fundo</label>
+          <div class="flex items-center gap-3 p-3 rounded-theme bg-elevated border border-bordercol">
+            <input type="color" id="custom-bg-picker" oninput="applyCustomBgColor(this.value)"
+              class="w-11 h-11 rounded-lg cursor-pointer border-0 bg-transparent shrink-0" value="#f4efe6" />
+            <div class="flex-1">
+              <div class="text-sm font-semibold">Seletor Livre de Fundo</div>
+              <div class="text-xs text-muted">Toque na cor ao lado para ajustar o tom exato</div>
+            </div>
+            <button onclick="resetCustomBgColor()" class="text-xs font-semibold px-2.5 py-1.5 rounded-theme bg-surface border border-bordercol hover:text-accent">
+              Resetar
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Modo de Exibição Padrão -->
+        <div class="mb-6">
+          <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Layout das Transações</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="setViewMode('cards')" class="p-3 rounded-theme border border-bordercol bg-elevated flex items-center gap-2 text-sm font-semibold">
+              <i class="ph-fill ph-squares-four text-accent text-lg"></i>
+              <span>Cards Detalhados</span>
+            </button>
+            <button onclick="setViewMode('list')" class="p-3 rounded-theme border border-bordercol bg-elevated flex items-center gap-2 text-sm font-semibold">
+              <i class="ph-bold ph-list-dashes text-accent text-lg"></i>
+              <span>Lista Compacta</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-bordercol space-y-2">
+        <button onclick="openFirebaseConfigModal()" class="w-full py-2.5 px-3 rounded-theme bg-elevated hover:bg-accent-soft text-xs font-semibold flex items-center justify-center gap-2 transition">
+          <i class="ph ph-database text-base text-accent"></i>
+          <span>Configurar Credenciais do Firebase</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ========================================================================
+       MODAL DE CONFIGURAÇÃO DO FIREBASE (OPCIONAL VIA INTERFACE)
+       ======================================================================== -->
+  <div id="firebase-config-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+    <div class="theme-card w-full max-w-lg p-6 animate-slide-up">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-base flex items-center gap-2">
+          <i class="ph-fill ph-fire text-amber-500 text-xl"></i>
+          <span>Conectar seu Projeto Firebase</span>
+        </h3>
+        <button onclick="closeFirebaseConfigModal()" class="p-1.5 rounded-full bg-elevated text-muted hover:text-txt">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+      <p class="text-xs text-muted mb-3">
+        Cole abaixo o objeto JSON do seu `firebaseConfig` (gerado no Console do Firebase) ou edite diretamente a constante `DEFAULT_FIREBASE_CONFIG` no código-fonte.
+      </p>
+      <textarea id="firebase-config-textarea" rows="7" placeholder='{"apiKey": "AIza...", "authDomain": "...", "projectId": "..."}'
+        class="w-full p-3 rounded-theme bg-elevated border border-bordercol font-mono text-xs text-txt focus:outline-none focus:border-accent mb-4"></textarea>
+      <div class="flex justify-end gap-2">
+        <button onclick="clearSavedFirebaseConfig()" class="px-3 py-2 rounded-theme bg-elevated text-xs font-semibold text-expense">Restaurar Padrão</button>
+        <button onclick="saveFirebaseConfigFromUI()" class="px-4 py-2 rounded-theme bg-accent text-white text-xs font-bold">Salvar e Recarregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST DE NOTIFICAÇÃO RÁPIDA -->
+  <div id="toast" class="fixed top-4 right-4 z-50 hidden items-center gap-2.5 px-4 py-3 rounded-theme bg-surface border-2 border-accent text-txt shadow-xl text-sm font-semibold">
+    <i id="toast-icon" class="ph-fill ph-check-circle text-accent text-xl"></i>
+    <span id="toast-msg">Salvo com sucesso!</span>
+  </div>
+
+  <!-- ========================================================================
+       JAVASCRIPT (ES6+ MODULAR + FIREBASE SDK V9 + PWA)
+       ======================================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      doc,
+      query,
+      where,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    // ========================================================================
+    // 1. CONFIGURAÇÃO DO FIREBASE (SUBSTITUA AQUI OU CONFIGURE PELA UI)
+    // ========================================================================
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "seu-projeto.firebaseapp.com",
+      projectId: "seu-projeto",
+      storageBucket: "seu-projeto.appspot.com",
+      messagingSenderId: "000000000000",
+      appId: "1:000000000000:web:000000000000"
+    };
+
+    // ========================================================================
+    // 2. AS 7 CATEGORIAS OBRIGATÓRIAS COM ÍCONES E CORES
+    // ========================================================================
+    const CATEGORIAS = [
+      { id: "Moradia & Contas Fixas", nome: "Moradia & Contas Fixas", icone: "ph-house-line", cor: "#f59e0b" },
+      { id: "Alimentação (Mercado & Delivery)", nome: "Alimentação (Mercado & Delivery)", icone: "ph-fork-knife", cor: "#ef4444" },
+      { id: "Transporte", nome: "Transporte", icone: "ph-car-profile", cor: "#3b82f6" },
+      { id: "Lazer & Assinaturas", nome: "Lazer & Assinaturas", icone: "ph-game-controller", cor: "#ec4899" },
+      { id: "Saúde & Cuidados Pessoais", nome: "Saúde & Cuidados Pessoais", icone: "ph-heartbeat", cor: "#14b8a6" },
+      { id: "Educação & Projetos", nome: "Educação & Projetos", icone: "ph-student", cor: "#8b5cf6" },
+      { id: "Receitas (Salário, Freelance, Pix recebido)", nome: "Receitas (Salário, Freelance, Pix recebido)", icone: "ph-hand-coins", cor: "#10b981" }
+    ];
+
+    // ========================================================================
+    // 3. ESTADO GLOBAL DA APLICAÇÃO
+    // ========================================================================
+    const state = {
+      mode: "demo", // 'firebase' ou 'demo'
+      user: null,
+      authMode: "login",
+      transactions: [],
+      unsubscribeSnapshot: null,
+      selectedYear: new Date().getFullYear(),
+      selectedMonth: new Date().getMonth(), // 0-11
+      selectedCategory: "all",
+      viewMode: localStorage.getItem("fin_view_mode") || "cards",
+      formType: "despesa",
+      formStatus: "pago"
+    };
+
+    let firebaseApp = null;
+    let auth = null;
+    let db = null;
+
+    // ========================================================================
+    // 4. INICIALIZAÇÃO DO FIREBASE OU FALLBACK DEMO
+    // ========================================================================
+    function initFirebaseSystem() {
+      let config = DEFAULT_FIREBASE_CONFIG;
+      const savedConfig = localStorage.getItem("fin_custom_firebase_config");
+      if (savedConfig) {
+        try { config = JSON.parse(savedConfig); } catch (e) { console.error(e); }
+      }
+
+      const isConfigured = config && config.apiKey && config.apiKey !== "SUA_API_KEY";
+
+      if (isConfigured) {
+        try {
+          firebaseApp = initializeApp(config);
+          auth = getAuth(firebaseApp);
+          db = getFirestore(firebaseApp);
+          state.mode = "firebase";
+
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              state.user = user;
+              enterAuthenticatedApp(user.email, "Firebase Real-Time");
+              subscribeToFirestoreTransactions(user.uid);
+            } else {
+              exitToAuthScreen();
+            }
+          });
+        } catch (err) {
+          console.warn("Erro ao inicializar Firebase, ativando suporte Demo:", err);
+        }
+      } else {
+        // Caso o usuário já estivesse em sessão Demo ativa anteriormente
+        if (localStorage.getItem("fin_demo_active") === "true") {
+          startDemoMode();
+        }
+      }
+    }
+
+    // ========================================================================
+    // 5. SINCRONIZAÇÃO EM TEMPO REAL (FIRESTORE onSnapshot) & CRUD ASSÍNCRONO
+    // ========================================================================
+    function subscribeToFirestoreTransactions(uid) {
+      if (state.unsubscribeSnapshot) state.unsubscribeSnapshot();
+
+      const txRef = collection(db, "transacoes");
+      const q = query(txRef, where("uid", "==", uid));
+
+      state.unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+        const list = [];
+        snapshot.forEach((docSnap) => {
+          list.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        // Ordena por data decrescente
+        list.sort((a, b) => (b.data || "").localeCompare(a.data || ""));
+        state.transactions = list;
+        renderApp();
+      }, (error) => {
+        console.error("Erro no onSnapshot:", error);
+        showToast("Erro ao sincronizar dados em tempo real", true);
+      });
+    }
+
+    async function saveTransaction(payload, existingId = null) {
+      if (state.mode === "firebase" && db && state.user) {
+        if (existingId) {
+          const docRef = doc(db, "transacoes", existingId);
+          await updateDoc(docRef, payload);
+        } else {
+          await addDoc(collection(db, "transacoes"), {
+            ...payload,
+            uid: state.user.uid,
+            createdAt: new Date().toISOString()
+          });
+        }
+      } else {
+        // Modo Demonstração com sincronização multi-aba (Broadcast / Storage)
+        if (existingId) {
+          const idx = state.transactions.findIndex(t => t.id === existingId);
+          if (idx > -1) state.transactions[idx] = { ...state.transactions[idx], ...payload };
+        } else {
+          state.transactions.unshift({
+            id: "tx_" + Date.now(),
+            ...payload,
+            createdAt: new Date().toISOString()
+          });
+        }
+        persistDemoTransactions();
+        renderApp();
+      }
+    }
+
+    async function removeTransaction(id) {
+      if (!confirm("Deseja realmente excluir este registro financeiro?")) return;
+      try {
+        if (state.mode === "firebase" && db) {
+          await deleteDoc(doc(db, "transacoes", id));
+        } else {
+          state.transactions = state.transactions.filter(t => t.id !== id);
+          persistDemoTransactions();
+          renderApp();
+        }
+        showToast("Registro removido!");
+      } catch (err) {
+        console.error(err);
+        showToast("Falha ao excluir registro", true);
+      }
+    }
+
+    async function toggleTransactionStatus(id) {
+      const tx = state.transactions.find(t => t.id === id);
+      if (!tx) return;
+      const novoStatus = tx.status === "pago" ? "pendente" : "pago";
+      try {
+        await saveTransaction({ status: novoStatus }, id);
+        showToast(`Status alterado para ${novoStatus.toUpperCase()}`);
+      } catch (err) {
+        showToast("Erro ao atualizar status", true);
+      }
+    }
+
+    // ========================================================================
+    // 6. MODO DEMONSTRAÇÃO COM DADOS INICIAIS REALISTAS
+    // ========================================================================
+    function startDemoMode() {
+      state.mode = "demo";
+      state.user = { uid: "demo_user", email: "modo.demonstracao@local.app" };
+      localStorage.setItem("fin_demo_active", "true");
+
+      const saved = localStorage.getItem("fin_demo_transactions");
+      if (saved) {
+        state.transactions = JSON.parse(saved);
+      } else {
+        const ym = `${state.selectedYear}-${String(state.selectedMonth + 1).padStart(2, "0")}`;
+        state.transactions = [
+          {
+            id: "demo_1",
+            tipo: "receita",
+            descricao: "Salário Mensal & Bolsa",
+            valor: 3850.00,
+            categoria: "Receitas (Salário, Freelance, Pix recebido)",
+            data: `${ym}-05`,
+            status: "pago"
+          },
+          {
+            id: "demo_2",
+            tipo: "despesa",
+            descricao: "Aluguel + Energia Elétrica",
+            valor: 1120.50,
+            categoria: "Moradia & Contas Fixas",
+            data: `${ym}-10`,
+            status: "pago"
+          },
+          {
+            id: "demo_3",
+            tipo: "despesa",
+            descricao: "Compras da Semana no Mercado",
+            valor: 438.90,
+            categoria: "Alimentação (Mercado & Delivery)",
+            data: `${ym}-12`,
+            status: "pago"
+          },
+          {
+            id: "demo_4",
+            tipo: "despesa",
+            descricao: "Componentes Eletrônicos & Sensores do Projeto",
+            valor: 185.00,
+            categoria: "Educação & Projetos",
+            data: `${ym}-14`,
+            status: "pago"
+          },
+          {
+            id: "demo_5",
+            tipo: "despesa",
+            descricao: "Streaming + Jogo Indie na Promoção",
+            valor: 64.90,
+            categoria: "Lazer & Assinaturas",
+            data: `${ym}-16`,
+            status: "pendente"
+          }
+        ];
+        persistDemoTransactions();
+      }
+
+      enterAuthenticatedApp("Modo Demonstração (Sincronização Local)", "Tempo Real Ativo");
+      renderApp();
+    }
+
+    function persistDemoTransactions() {
+      localStorage.setItem("fin_demo_transactions", JSON.stringify(state.transactions));
+    }
+
+    // Escuta alterações entre abas no Modo Demo (simula onSnapshot entre abas abertas)
+    window.addEventListener("storage", (e) => {
+      if (e.key === "fin_demo_transactions" && state.mode === "demo") {
+        state.transactions = JSON.parse(e.newValue || "[]");
+        renderApp();
+      }
+    });
+
+    // ========================================================================
+    // 7. RENDERIZAÇÃO DO DASHBOARD, FILTROS E LISTA/CARDS
+    // ========================================================================
+    function getFilteredTransactionsForMonth() {
+      const targetPrefix = `${state.selectedYear}-${String(state.selectedMonth + 1).padStart(2, "0")}`;
+      return state.transactions.filter(t => (t.data || "").startsWith(targetPrefix));
+    }
+
+    function renderApp() {
+      // Atualiza cabeçalho de Mês/Ano
+      const dateObj = new Date(state.selectedYear, state.selectedMonth, 1);
+      const monthName = dateObj.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+      document.getElementById("current-month-label").textContent = monthName;
+
+      const monthTransactions = getFilteredTransactionsForMonth();
+
+      // Cálculo dos 3 KPIs Vitais
+      let totalReceitas = 0;
+      let totalDespesas = 0;
+      let countReceitas = 0;
+      let countDespesas = 0;
+
+      monthTransactions.forEach(t => {
+        const val = Number(t.valor) || 0;
+        if (t.tipo === "receita") {
+          totalReceitas += val;
+          countReceitas++;
+        } else {
+          totalDespesas += val;
+          countDespesas++;
+        }
+      });
+
+      const saldoAtual = totalReceitas - totalDespesas;
+
+      document.getElementById("kpi-balance").textContent = formatCurrency(saldoAtual);
+      document.getElementById("kpi-balance").className = `text-2xl sm:text-3xl font-bold tracking-tight ${saldoAtual >= 0 ? "text-txt" : "text-expense"}`;
+      document.getElementById("kpi-income").textContent = formatCurrency(totalReceitas);
+      document.getElementById("kpi-income-sub").textContent = `${countReceitas} entrada(s) no mês`;
+      document.getElementById("kpi-expense").textContent = formatCurrency(totalDespesas);
+      document.getElementById("kpi-expense-sub").textContent = `${countDespesas} saída(s) no mês`;
+
+      // Renderiza Barra de Distribuição de Categorias
+      renderCategoryBreakdown(monthTransactions, totalReceitas, totalDespesas);
+
+      // Renderiza Pílulas de Filtro de Categoria
+      renderCategoryPills(monthTransactions);
+
+      // Aplica Filtros de Categoria, Status e Busca Textual
+      const searchQuery = (document.getElementById("search-input").value || "").toLowerCase().trim();
+      const statusFilter = document.getElementById("status-filter").value;
+
+      const visibleTransactions = monthTransactions.filter(t => {
+        const matchCat = state.selectedCategory === "all" || t.categoria === state.selectedCategory;
+        const matchStatus = statusFilter === "all" || t.status === statusFilter;
+        const matchSearch = !searchQuery ||
+          (t.descricao || "").toLowerCase().includes(searchQuery) ||
+          (t.categoria || "").toLowerCase().includes(searchQuery);
+        return matchCat && matchStatus && matchSearch;
+      });
+
+      renderTransactionsList(visibleTransactions);
+      updateViewModeButtons();
+    }
+
+    function renderCategoryBreakdown(monthTransactions, totalReceitas, totalDespesas) {
+      const barContainer = document.getElementById("category-progress-bar");
+      const legendContainer = document.getElementById("category-legend");
+      const badge = document.getElementById("expense-commitment-badge");
+
+      if (totalReceitas > 0) {
+        const pct = Math.min(999, Math.round((totalDespesas / totalReceitas) * 100));
+        badge.textContent = `${pct}% da receita comprometida`;
+      } else {
+        badge.textContent = totalDespesas > 0 ? "Sem receitas registradas no mês" : "0% comprometido";
+      }
+
+      if (totalDespesas <= 0) {
+        barContainer.innerHTML = `<div class="w-full h-full bg-elevated"></div>`;
+        legendContainer.innerHTML = `<span class="text-muted text-xs">Adicione despesas no mês para visualizar a distribuição por categoria.</span>`;
+        return;
+      }
+
+      const totalsByCat = {};
+      monthTransactions.filter(t => t.tipo === "despesa").forEach(t => {
+        totalsByCat[t.categoria] = (totalsByCat[t.categoria] || 0) + Number(t.valor);
+      });
+
+      let barHTML = "";
+      let legendHTML = "";
+
+      CATEGORIAS.forEach(cat => {
+        const val = totalsByCat[cat.id] || 0;
+        if (val > 0) {
+          const pct = ((val / totalDespesas) * 100).toFixed(1);
+          barHTML += `<div style="width: ${pct}%; background-color: ${cat.cor}" title="${cat.nome}: ${formatCurrency(val)} (${pct}%)"></div>`;
+          legendHTML += `
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-elevated border border-bordercol">
+              <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${cat.cor}"></span>
+              <span class="font-medium truncate max-w-[150px]">${cat.nome.split(" (")[0]}</span>
+              <span class="font-bold text-muted">${pct}%</span>
+            </div>
+          `;
+        }
+      });
+
+      barContainer.innerHTML = barHTML;
+      legendContainer.innerHTML = legendHTML;
+    }
+
+    function renderCategoryPills(monthTransactions) {
+      const container = document.getElementById("category-pills");
+      const counts = { all: monthTransactions.length };
+      monthTransactions.forEach(t => {
+        counts[t.categoria] = (counts[t.categoria] || 0) + 1;
+      });
+
+      let html = `
+        <button onclick="selectCategoryFilter('all')"
+          class="px-3.5 py-2 rounded-theme text-xs font-bold whitespace-nowrap transition min-h-[38px] flex items-center gap-1.5 ${
+            state.selectedCategory === "all"
+              ? "bg-accent text-white shadow-xs"
+              : "bg-surface border border-bordercol text-txt hover:border-accent"
+          }">
+          <span>Todas</span>
+          <span class="px-1.5 py-0.5 text-[10px] rounded-full bg-black/15">${counts.all}</span>
+        </button>
+      `;
+
+      CATEGORIAS.forEach(cat => {
+        const count = counts[cat.id] || 0;
+        const isSelected = state.selectedCategory === cat.id;
+        const shortName = cat.nome.split(" (")[0];
+        html += `
+          <button onclick="selectCategoryFilter('${cat.id}')"
+            class="px-3.5 py-2 rounded-theme text-xs font-bold whitespace-nowrap transition min-h-[38px] flex items-center gap-1.5 ${
+              isSelected
+                ? "bg-accent text-white shadow-xs"
+                : "bg-surface border border-bordercol text-txt hover:border-accent"
+            }">
+            <i class="ph-bold ${cat.icone}"></i>
+            <span>${shortName}</span>
+            ${count > 0 ? `<span class="px-1.5 py-0.5 text-[10px] rounded-full bg-black/10">${count}</span>` : ""}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderTransactionsList(list) {
+      const container = document.getElementById("transactions-container");
+      const emptyState = document.getElementById("empty-state");
+
+      if (list.length === 0) {
+        container.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+
+      // MODO 1: VISUALIZAÇÃO EM CARDS (Mais detalhada)
+      if (state.viewMode === "cards") {
+        container.className = "grid grid-cols-1 md:grid-cols-2 gap-3.5";
+        container.innerHTML = list.map(tx => {
+          const catMeta = CATEGORIAS.find(c => c.id === tx.categoria) || CATEGORIAS[0];
+          const isReceita = tx.tipo === "receita";
+          const isPago = tx.status === "pago";
+
+          return `
+            <article class="theme-card p-4 flex flex-col justify-between gap-3 hover:border-accent">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-12 h-12 rounded-theme flex items-center justify-center text-2xl shrink-0"
+                       style="background-color: ${catMeta.cor}20; color: ${catMeta.cor}">
+                    <i class="ph-duotone ${catMeta.icone}"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <h3 class="font-bold text-base truncate">${escapeHTML(tx.descricao)}</h3>
+                    <p class="text-xs text-muted truncate">${escapeHTML(tx.categoria)}</p>
+                  </div>
+                </div>
+
+                <div class="text-right shrink-0">
+                  <div class="text-lg font-bold ${isReceita ? "text-income" : "text-expense"}">
+                    ${isReceita ? "+" : "-"} ${formatCurrency(tx.valor)}
+                  </div>
+                  <div class="text-xs text-muted">${formatDateBR(tx.data)}</div>
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-bordercol flex items-center justify-between gap-2">
+                <button onclick="toggleTransactionStatus('${tx.id}')"
+                  class="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition min-h-[34px] ${
+                    isPago
+                      ? "bg-emerald-500/15 text-income"
+                      : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                  }">
+                  <i class="ph-fill ${isPago ? "ph-check-circle" : "ph-clock"}"></i>
+                  <span>${isPago ? (isReceita ? "Recebido" : "Pago") : "Pendente (Toque p/ quitar)"}</span>
+                </button>
+
+                <div class="flex items-center gap-1">
+                  <button onclick="openTransactionModal('${tx.id}')" title="Editar"
+                    class="p-2 rounded-theme bg-elevated hover:bg-accent-soft text-txt min-w-[38px] min-h-[38px] flex items-center justify-center">
+                    <i class="ph ph-pencil-simple text-base"></i>
+                  </button>
+                  <button onclick="removeTransaction('${tx.id}')" title="Excluir"
+                    class="p-2 rounded-theme bg-elevated hover:bg-rose-500/20 text-expense min-w-[38px] min-h-[38px] flex items-center justify-center">
+                    <i class="ph ph-trash text-base"></i>
+                  </button>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
+      } else {
+        // MODO 2: VISUALIZAÇÃO EM LISTA COMPACTA (Extrato Mensal)
+        container.className = "theme-card divide-y divide-bordercol overflow-hidden";
+        container.innerHTML = list.map(tx => {
+          const catMeta = CATEGORIAS.find(c => c.id === tx.categoria) || CATEGORIAS[0];
+          const isReceita = tx.tipo === "receita";
+          const isPago = tx.status === "pago";
+
+          return `
+            <div class="p-3 sm:px-4 flex items-center justify-between gap-3 hover:bg-elevated/60 transition">
+              <div class="flex items-center gap-3 min-w-0">
+                <button onclick="toggleTransactionStatus('${tx.id}')" title="Alternar Pago/Pendente"
+                  class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition ${
+                    isPago ? "bg-emerald-500/15 text-income" : "bg-amber-500/20 text-amber-500"
+                  }">
+                  <i class="ph-fill ${isPago ? "ph-check-circle" : "ph-clock"} text-lg"></i>
+                </button>
+                <div class="min-w-0">
+                  <div class="font-bold text-sm truncate">${escapeHTML(tx.descricao)}</div>
+                  <div class="text-xs text-muted flex items-center gap-1.5 truncate">
+                    <span>${formatDateBR(tx.data)}</span>
+                    <span>•</span>
+                    <span class="truncate">${escapeHTML(tx.categoria.split(" (")[0])}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="font-bold text-sm sm:text-base ${isReceita ? "text-income" : "text-expense"}">
+                  ${isReceita ? "+" : "-"} ${formatCurrency(tx.valor)}
+                </span>
+                <button onclick="openTransactionModal('${tx.id}')" class="p-2 text-muted hover:text-txt" title="Editar">
+                  <i class="ph ph-pencil-simple"></i>
+                </button>
+                <button onclick="removeTransaction('${tx.id}')" class="p-2 text-muted hover:text-expense" title="Excluir">
+                  <i class="ph ph-trash"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+
+    // ========================================================================
+    // 8. CONTROLE DE MODAIS, FORMULÁRIOS E PREFERÊNCIAS ESTÉTICAS
+    // ========================================================================
+    function populateCategorySelect() {
+      const select = document.getElementById("tx-categoria");
+      select.innerHTML = CATEGORIAS.map(c => `<option value="${c.id}">${c.nome}</option>`).join("");
+    }
+
+    window.openTransactionModal = function(editId = null) {
+      const modal = document.getElementById("transaction-modal");
+      const title = document.getElementById("modal-title");
+      const form = document.getElementById("transaction-form");
+      form.reset();
+
+      if (editId) {
+        const tx = state.transactions.find(t => t.id === editId);
+        if (!tx) return;
+        title.innerHTML = `<i class="ph-duotone ph-pencil-circle text-accent text-xl"></i><span>Editar Transação</span>`;
+        document.getElementById("tx-id").value = tx.id;
+        document.getElementById("tx-valor").value = tx.valor;
+        document.getElementById("tx-descricao").value = tx.descricao;
+        document.getElementById("tx-categoria").value = tx.categoria;
+        document.getElementById("tx-data").value = tx.data;
+        setFormType(tx.tipo);
+        setFormStatus(tx.status);
+      } else {
+        title.innerHTML = `<i class="ph-duotone ph-plus-circle text-accent text-xl"></i><span>Nova Transação</span>`;
+        document.getElementById("tx-id").value = "";
+        document.getElementById("tx-data").value = new Date().toISOString().split("T")[0];
+        setFormType("despesa");
+        setFormStatus("pago");
+      }
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      setTimeout(() => document.getElementById("tx-valor").focus(), 100);
+    };
+
+    window.closeTransactionModal = function() {
+      const modal = document.getElementById("transaction-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    };
+
+    window.setFormType = function(type) {
+      state.formType = type;
+      const btnDespesa = document.getElementById("btn-type-despesa");
+      const btnReceita = document.getElementById("btn-type-receita");
+      const catSelect = document.getElementById("tx-categoria");
+
+      if (type === "despesa") {
+        btnDespesa.className = "py-3 rounded-theme font-bold text-sm flex items-center justify-center gap-2 transition min-h-[46px] bg-expense text-white shadow-sm";
+        btnReceita.className = "py-3 rounded-theme font-bold text-sm flex items-center justify-center gap-2 transition min-h-[46px] text-muted hover:text-txt";
+        if (catSelect.value.startsWith("Receitas")) {
+          catSelect.value = CATEGORIAS[1].id;
+        }
+      } else {
+        btnReceita.className = "py-3 rounded-theme font-bold text-sm flex items-center justify-center gap-2 transition min-h-[46px] bg-income text-white shadow-sm";
+        btnDespesa.className = "py-3 rounded-theme font-bold text-sm flex items-center justify-center gap-2 transition min-h-[46px] text-muted hover:text-txt";
+        catSelect.value = "Receitas (Salário, Freelance, Pix recebido)";
+      }
+    };
+
+    window.setFormStatus = function(status) {
+      state.formStatus = status;
+      const btnPago = document.getElementById("btn-status-pago");
+      const btnPendente = document.getElementById("btn-status-pendente");
+
+      if (status === "pago") {
+        btnPago.className = "rounded-theme text-xs font-bold flex items-center justify-center gap-1 transition py-2 bg-surface text-income shadow-xs";
+        btnPendente.className = "rounded-theme text-xs font-bold flex items-center justify-center gap-1 transition py-2 text-muted";
+      } else {
+        btnPendente.className = "rounded-theme text-xs font-bold flex items-center justify-center gap-1 transition py-2 bg-surface text-amber-500 shadow-xs";
+        btnPago.className = "rounded-theme text-xs font-bold flex items-center justify-center gap-1 transition py-2 text-muted";
+      }
+    };
+
+    document.getElementById("transaction-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("tx-id").value || null;
+      const payload = {
+        tipo: state.formType,
+        descricao: document.getElementById("tx-descricao").value.trim(),
+        valor: parseFloat(parseFloat(document.getElementById("tx-valor").value).toFixed(2)),
+        categoria: document.getElementById("tx-categoria").value,
+        data: document.getElementById("tx-data").value,
+        status: state.formStatus
+      };
+
+      try {
+        await saveTransaction(payload, id);
+        closeTransactionModal();
+        showToast(id ? "Transação atualizada!" : "Transação registrada!");
+      } catch (err) {
+        console.error(err);
+        showToast("Erro ao salvar transação", true);
+      }
+    });
+
+    // ========================================================================
+    // 9. TEMAS ESTÉTICOS, COR DE FUNDO E ACESSIBILIDADE
+    // ========================================================================
+    window.toggleDrawer = function(open) {
+      const drawer = document.getElementById("preferences-drawer");
+      drawer.classList.toggle("hidden", !open);
+    };
+
+    window.applyTheme = function(themeName) {
+      document.documentElement.setAttribute("data-theme", themeName);
+      localStorage.setItem("fin_theme", themeName);
+      // Limpa cor de fundo customizada ao trocar para um tema predefinido
+      document.body.style.backgroundColor = "";
+      localStorage.removeItem("fin_custom_bg");
+
+      document.querySelectorAll(".theme-option-btn").forEach(btn => {
+        const active = btn.getAttribute("data-theme-btn") === themeName;
+        btn.classList.toggle("border-accent", active);
+        btn.classList.toggle("bg-accent-soft", active);
+      });
+    };
+
+    window.applyFontScale = function(scale) {
+      document.documentElement.setAttribute("data-font-scale", scale);
+      localStorage.setItem("fin_font_scale", scale);
+      ["sm", "md", "lg"].forEach(s => {
+        const btn = document.getElementById(`font-btn-${s}`);
+        if (btn) {
+          btn.className = s === scale
+            ? "py-2.5 rounded-theme font-bold text-xs sm:text-sm transition min-h-[42px] bg-accent text-white shadow-xs"
+            : "py-2.5 rounded-theme font-bold text-xs sm:text-sm transition min-h-[42px] text-muted hover:text-txt";
+        }
+      });
+    };
+
+    window.applyCustomBgColor = function(hexColor) {
+      document.body.style.backgroundColor = hexColor;
+      localStorage.setItem("fin_custom_bg", hexColor);
+    };
+
+    window.resetCustomBgColor = function() {
+      document.body.style.backgroundColor = "";
+      localStorage.removeItem("fin_custom_bg");
+    };
+
+    window.setViewMode = function(mode) {
+      state.viewMode = mode;
+      localStorage.setItem("fin_view_mode", mode);
+      renderApp();
+    };
+
+    function updateViewModeButtons() {
+      const btnCards = document.getElementById("view-btn-cards");
+      const btnList = document.getElementById("view-btn-list");
+      if (state.viewMode === "cards") {
+        btnCards.className = "p-2 rounded-theme text-sm font-bold flex items-center gap-1 transition min-h-[36px] px-2.5 bg-surface text-accent shadow-xs";
+        btnList.className = "p-2 rounded-theme text-sm font-medium flex items-center gap-1 transition min-h-[36px] px-2.5 text-muted hover:text-txt";
+      } else {
+        btnList.className = "p-2 rounded-theme text-sm font-bold flex items-center gap-1 transition min-h-[36px] px-2.5 bg-surface text-accent shadow-xs";
+        btnCards.className = "p-2 rounded-theme text-sm font-medium flex items-center gap-1 transition min-h-[36px] px-2.5 text-muted hover:text-txt";
+      }
+    }
+
+    // ========================================================================
+    // 10. NAVEGAÇÃO DE MESES E AUTENTICAÇÃO
+    // ========================================================================
+    window.changeMonth = function(delta) {
+      state.selectedMonth += delta;
+      if (state.selectedMonth > 11) {
+        state.selectedMonth = 0;
+        state.selectedYear++;
+      } else if (state.selectedMonth < 0) {
+        state.selectedMonth = 11;
+        state.selectedYear--;
+      }
+      renderApp();
+    };
+
+    window.resetToCurrentMonth = function() {
+      const now = new Date();
+      state.selectedYear = now.getFullYear();
+      state.selectedMonth = now.getMonth();
+      renderApp();
+    };
+
+    window.selectCategoryFilter = function(catId) {
+      state.selectedCategory = catId;
+      renderApp();
+    };
+
+    window.switchAuthTab = function(mode) {
+      state.authMode = mode;
+      const tabLogin = document.getElementById("tab-login");
+      const tabRegister = document.getElementById("tab-register");
+      const submitBtn = document.getElementById("auth-submit-btn");
+
+      if (mode === "login") {
+        tabLogin.className = "py-2 rounded-theme bg-surface text-txt shadow-sm transition";
+        tabRegister.className = "py-2 rounded-theme text-muted hover:text-txt transition";
+        submitBtn.innerHTML = `<i class="ph-bold ph-sign-in text-lg"></i><span>Acessar Meu Painel</span>`;
+      } else {
+        tabRegister.className = "py-2 rounded-theme bg-surface text-txt shadow-sm transition";
+        tabLogin.className = "py-2 rounded-theme text-muted hover:text-txt transition";
+        submitBtn.innerHTML = `<i class="ph-bold ph-user-plus text-lg"></i><span>Criar Minha Conta</span>`;
+      }
+    };
+
+    document.getElementById("auth-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("auth-email").value.trim();
+      const password = document.getElementById("auth-password").value;
+
+      if (state.mode !== "firebase" || !auth) {
+        // Se o usuário ainda não configurou chaves do Firebase, inicia com o e-mail informado em modo local
+        state.user = { uid: "local_" + email, email };
+        startDemoMode();
+        document.getElementById("user-display-email").textContent = email;
+        showToast("Sessão iniciada!");
+        return;
+      }
+
+      try {
+        if (state.authMode === "login") {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+      } catch (err) {
+        showToast(err.message || "Erro na autenticação", true);
+      }
+    });
+
+    window.handleLogout = async function() {
+      localStorage.removeItem("fin_demo_active");
+      if (state.unsubscribeSnapshot) state.unsubscribeSnapshot();
+      if (state.mode === "firebase" && auth) {
+        await signOut(auth);
+      }
+      exitToAuthScreen();
+    };
+
+    function enterAuthenticatedApp(emailText, badgeText) {
+      document.getElementById("auth-screen").classList.add("hidden");
+      document.getElementById("app-container").classList.remove("hidden");
+      document.getElementById("fab-add").classList.remove("hidden");
+      document.getElementById("user-display-email").textContent = emailText;
+      document.getElementById("connection-badge").innerHTML = `
+        <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+        <span>${badgeText}</span>
+      `;
+    }
+
+    function exitToAuthScreen() {
+      document.getElementById("auth-screen").classList.remove("hidden");
+      document.getElementById("app-container").classList.add("hidden");
+      document.getElementById("fab-add").classList.add("hidden");
+    }
+
+    // Modal de Configuração JSON do Firebase
+    window.openFirebaseConfigModal = function() {
+      const modal = document.getElementById("firebase-config-modal");
+      const saved = localStorage.getItem("fin_custom_firebase_config");
+      document.getElementById("firebase-config-textarea").value = saved || JSON.stringify(DEFAULT_FIREBASE_CONFIG, null, 2);
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    };
+
+    window.closeFirebaseConfigModal = function() {
+      const modal = document.getElementById("firebase-config-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    };
+
+    window.saveFirebaseConfigFromUI = function() {
+      try {
+        const raw = document.getElementById("firebase-config-textarea").value;
+        const parsed = JSON.parse(raw);
+        localStorage.setItem("fin_custom_firebase_config", JSON.stringify(parsed));
+        location.reload();
+      } catch (e) {
+        alert("JSON inválido. Verifique as aspas e chaves do objeto firebaseConfig.");
+      }
+    };
+
+    window.clearSavedFirebaseConfig = function() {
+      localStorage.removeItem("fin_custom_firebase_config");
+      location.reload();
+    };
+
+    window.startDemoMode = startDemoMode;
+    window.toggleTransactionStatus = toggleTransactionStatus;
+    window.removeTransaction = removeTransaction;
+
+    // ========================================================================
+    // 11. UTILITÁRIOS E PWA EMBUTIDO (MANIFEST + SERVICE WORKER)
+    // ========================================================================
+    function formatCurrency(value) {
+      return Number(value || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+
+    function formatDateBR(dateStr) {
+      if (!dateStr) return "";
+      const [y, m, d] = dateStr.split("-");
+      return `${d}/${m}/${y}`;
+    }
+
+    function escapeHTML(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById("toast");
+      const icon = document.getElementById("toast-icon");
+      document.getElementById("toast-msg").textContent = msg;
+      icon.className = isError
+        ? "ph-fill ph-warning-circle text-expense text-xl"
+        : "ph-fill ph-check-circle text-accent text-xl";
+      toast.classList.remove("hidden");
+      toast.classList.add("flex");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+        toast.classList.remove("flex");
+      }, 2600);
+    }
+
+    function setupSingleFilePWA() {
+      // Gera manifest.json dinâmico via Blob para manter tudo em 1 único arquivo
+      const manifest = {
+        name: "Meu Bolso — Controle Financeiro Pessoal",
+        short_name: "Meu Bolso",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#f4EFE6",
+        theme_color: "#526b56",
+        icons: [
+          {
+            src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23526b56'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-size='54'>🌿</text></svg>",
+            sizes: "192x192",
+            type: "image/svg+xml"
+          }
+        ]
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+      const manifestURL = URL.createObjectURL(manifestBlob);
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = manifestURL;
+      document.head.appendChild(link);
+    }
+
+    // Inicialização ao carregar o DOM
+    window.addEventListener("DOMContentLoaded", () => {
+      populateCategorySelect();
+
+      const savedTheme = localStorage.getItem("fin_theme") || "cottagecore";
+      applyTheme(savedTheme);
+
+      const savedScale = localStorage.getItem("fin_font_scale") || "md";
+      applyFontScale(savedScale);
+
+      const savedCustomBg = localStorage.getItem("fin_custom_bg");
+      if (savedCustomBg) {
+        document.body.style.backgroundColor = savedCustomBg;
+        document.getElementById("custom-bg-picker").value = savedCustomBg;
+      }
+
+      setupSingleFilePWA();
+      initFirebaseSystem();
+    });
+  </script>
+</body>
+</html>
